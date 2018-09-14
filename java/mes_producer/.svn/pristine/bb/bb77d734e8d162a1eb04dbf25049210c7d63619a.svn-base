@@ -1,0 +1,87 @@
+<script type="text/javascript">
+
+$(function() {
+  $("#outputReportDate").datepicker({dateFormat: "yy/mm/dd"});
+});
+
+function outputReport() {
+  var dialogProp = dialogUtils.defaultProp();
+
+  dialogProp.title = "<bean:message key='master.btn.output.report' />";
+  dialogProp.minWidth = 210;
+  dialogProp.minHeight = 300;
+  dialogProp.buttons = [
+                         { text: '<bean:message key="execute" />',
+                           width: 80,
+                           click: function() {
+
+                             if (!isDate($("#outputReportDate").val())) {
+                               dialogUtils.alert("<bean:message key='errors.report.date'/>");
+                               return;
+                             }
+
+                             switch ($("#outputReportId").val()) {
+                               case "1":
+                                 location.href="${f:url('/report/productReport')}"
+                                              +"?outputReportKind=" + $('input[name="outputReportKind"]:checked').val()
+                                              +"&outputReportDate=" + $("#outputReportDate").val();
+                                 break;
+                               case "2":
+                                 location.href="${f:url('/report/materialReport')}"
+                                              +"?outputReportKind=" + $('input[name="outputReportKind"]:checked').val()
+                                              +"&outputReportDate=" + $("#outputReportDate").val();
+                                 break;
+                             }
+                           }
+                         },
+                         { text: '<bean:message key="close" />',
+                           width: 80,
+                           click: function() { $("#reportDialog").dialog("close") }
+                         }
+                       ];
+  $("#reportDialog").dialog(dialogProp);
+}
+</script>
+
+<div id="reportDialog" style="display: none;">
+  <div style="padding-top: 20px;"></div>
+
+  <div class="tableStyle" style="padding-left: 30px;">
+    <div style="height: 50px;">
+      <div style="width: 100px;">
+        <img src="${f:url('/img/square.png')}" style="width: 10px;">
+        <span><bean:message key="report" /></span>
+      </div>
+      <div style="width: 220px;">
+        <html:select property="outputReportId" styleId="outputReportId">
+          <html:optionsCollection property="reportOptionItems" />
+        </html:select>
+      </div>
+    </div>
+    <div style="height: 50px;">
+      <div>
+        <img src="${f:url('/img/square.png')}" style="width: 10px;">
+        <span><bean:message key="kind" /></span>
+      </div>
+      <div>
+        <label>
+          <html:radio property="outputReportKind" value="1" /><bean:message key="monthly.report" />
+        </label>
+        <br>
+        <label>
+          <html:radio property="outputReportKind" value="2" /><bean:message key="daily.report" />
+        </label>
+      </div>
+    </div>
+    <div style="height: 50px;">
+      <div>
+        <img src="${f:url('/img/square.png')}" style="width: 10px;">
+        <span><bean:message key="date" /></span>
+      </div>
+      <div>
+        <input type="text" id="outputReportDate" style="width: 100px;" maxlength="10" />
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,237 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
+
+<tiles:insert template="/WEB-INF/view/common/layout.jsp" flush="true">
+
+  <bean:define id="title">
+    <bean:message key="product.result.input"/>
+  </bean:define>
+
+  <tiles:put name="title" value="${title}"/>
+  <tiles:put name="titleRight">
+    <input type="button" value="<bean:message key="display.update"/>"  style="width:180px;" onclick="doDisplayUpdate()" />
+  </tiles:put>
+  <tiles:put name="content" type="string">
+
+    <jsp:include page="productGrid.jsp"/>
+    <jsp:include page="processGrid.jsp"/>
+    <jsp:include page="productResultGrid.jsp"/>
+    <jsp:include page="productResultInsertDialog.jsp"/>
+    <jsp:include page="productResultGridCommon.jsp"/>
+    <jsp:include page="productRePrintQualityLabelDialog.jsp"/>
+    <jsp:include page="productShippingTicketPrintingDialog.jsp"/>
+    <script type="text/javascript">
+
+    var productGrid = new JqGridUtils("#productList", null);
+    var processGrid = new JqGridUtils("#processList", null);
+    var processProductGrid = new JqGridUtils("#processProductList", "#processProductListPager");
+    var insertPocessGrid = new JqGridUtils("#insertProcessList", null);
+    var insertPocessProductGrid = new JqGridUtils("#insertProcessProductList", null);
+    var shippingProductGrid = new JqGridUtils("#shippingProductList", null);
+    
+    $(function() {
+	 
+      createProductGrid();
+      createProcessGrid();
+      createProcessProductGrid();
+      createInsertProcessGrid();
+      createInsertProcessProductGrid();
+      createPrinter();
+      createShippingPrinter();
+      createShippingPrinterGrid()
+      // To re-select the row that has been selected before update.
+      // This process needs to be executed after the creation process of each grid.
+      if ($("#selectRowOfProcessGrid").val()) {
+        $(processGrid.gridId).setSelection($("#selectRowOfProcessGrid").val());
+      }
+
+      // When the Enter key is pressed, run the process when the Add button is pressed.(on Result input dialog)
+      $("#inputSerialNo").val("");
+      $("#inputSerialNo").keypress(function (e) {
+        if ( e.which == 13 ) {
+          addProductResultRow();
+          return false;
+        }
+      } );
+    });
+
+    function doDisplayUpdate() {
+
+      if (processGrid.isEditing()) {
+        dialogUtils.confirm(
+          "<bean:message key='info.editing'/>",
+            function() {
+              $("#mainForm").attr("action", "${f:url('/product/productResultInput/')}");
+              $("#mainForm").submit();
+            });
+      }else{
+        $("#mainForm").attr("action", "${f:url('/product/productResultInput/')}");
+        $("#mainForm").submit();
+      }
+    }
+
+    function doReturn() {
+
+      var callerParam = "displayStartDate=" + $("#callerDisplayStartDate").val() + "&"
+                      + "displayEndDate=" + $("#callerDisplayEndDate").val()
+
+      if (processGrid.isEditing()) {
+        dialogUtils.confirm(
+          "<bean:message key='info.editing'/>",
+            function() {
+              $("#mainForm").attr("action", "${f:url('/product/productResult/')}?" + callerParam);
+              $("#mainForm").submit();
+            });
+      }else{
+        $("#mainForm").attr("action", "${f:url('/product/productResult/')}?" + callerParam);
+        $("#mainForm").submit();
+      }
+    }
+
+    function doRegister() {
+
+      dialogUtils.confirm(
+        "<bean:message key='info.register'/>",
+        function() {
+          if (!processProductGrid.prop.saveEditRow(processProductGrid.lastSelRowId)) return;
+          if (!processGrid.prop.saveEditRow(processGrid.lastSelRowId)) return;
+
+          var sendData = processGrid.getUpdateData();
+
+          ajaxPostJson({
+            url: "${f:url('/product/productResultInput/register/')}",
+            data: {
+              productPlanNo : $("#productPlanNo").val(),
+              processResultJson : JSON.stringify(sendData),
+            },
+            success: function(data) {
+              if (data.result == "OK") {
+
+                // For selecting a row of the processgrid after the update, and back up the selected row in the processgrid.
+                $("#selectRowOfProcessGrid").val(processGrid.selrow());
+
+                $("#mainForm").attr("action", "${f:url('/product/productResultInput/')}");
+                $("#mainForm").submit();
+
+              } else if (data.result == "NG") {
+                dialogUtils.alert(data.message);
+              }
+            }
+          });
+
+        }
+      );
+    }
+
+    function openProductResultInsertDialog(){
+
+      var rowId = processGrid.selrow();
+
+      if (rowId == null) {
+        dialogUtils.alert("<bean:message key='errors.not.select'/>");
+        return false;
+      }
+
+      var productJson = '${productJson}';
+      var processInfo = new Array($.parseJSON(productJson));
+      processInfo[0].processComponentNo = $(processGrid.gridId).getCell(rowId, "processComponentNo");
+      processInfo[0].processName = $(processGrid.gridId).getCell(rowId, "processName");
+
+      var productsMaterialSize = $(processGrid.gridId).getCell(rowId, "productsMaterialSize");
+      var productsSpecSize = $(processGrid.gridId).getCell(rowId, "productsSpecSize");
+      var productPlans = $(processGrid.gridId).getCell(rowId, "productPlans");
+		if( processInfo[0].processComponentNo == 1){
+			productsMaterialSize = 0;
+			productsSpecSize = 0;
+		}
+      initializeProductResultInsertDialog(processInfo, productsMaterialSize, productsSpecSize, $.parseJSON(productPlans));
+    }
+
+    function doProductResultDelete(){
+
+      var rowId = processProductGrid.selrow();
+      if (rowId == null) {
+        dialogUtils.alert("<bean:message key='errors.not.select'/>");
+        return false;
+      }
+
+      var processComponentNo = $(processGrid.gridId).getCell(processGrid.selrow(), "processComponentNo");
+      var barcodeNo = $(processProductGrid.gridId).getCell(rowId, "barcode");
+      var serialNo = $(processProductGrid.gridId).getCell(rowId, "serialNo");
+      var revision = $(processProductGrid.gridId).getCell(rowId, "revision");
+
+      dialogUtils.confirm(
+        "<bean:message key='info.delete'/>",
+        function() {
+
+          $("#processComponentNo").val(processComponentNo);
+          $("#serialNo").val(serialNo);
+          $("#barcodeNo").val(barcodeNo);
+          $("#revision").val(revision);
+
+          // For selecting a row of the processgrid after the update, and back up the selected row in the processgrid.
+          $("#selectRowOfProcessGrid").val(processGrid.selrow());
+
+          $("#mainForm").attr("action", "${f:url('/product/productResultInput/productResultDelete/')}");
+          $("#mainForm").submit();
+        }
+      );
+    }
+
+    </script>
+
+    <s:form method="post" styleId="mainForm">
+
+      <div style="display: table; width: 100%;">
+        <div style="display: table-cell;">
+          <input type="button" value="<bean:message key="return"/>"  style="width:180px;" onclick="doReturn()" />
+        </div>
+
+        <div style="display: table-cell; text-align: right;">
+        <input type="button" value="<bean:message key="register" />" onclick="doRegister()" style="width:180px;" onclick="" />
+        </div>
+      </div>
+
+      <div style="margin-top:5px;">
+        <table class="scroll" id="productList"></table>
+      </div>
+
+      <div style="margin-top:10px;">
+        <table class="scroll" id="processList"></table>
+      </div>
+
+      <div style="position:relative; width:1100px; margin-top:15px; margin-bottom:5px;">
+        <div style="width:100%; text-align:left; margin-bottom: 10px;">
+          <input type="button" value="<bean:message key='process.product.result.delete'/>"  style="width:180px;" onclick="doProductResultDelete()" />
+          <input type="button" value="<bean:message key='process.product.result.input'/>"  style="width:180px; " onclick="openProductResultInsertDialog()" />
+          <input type="button" value="<bean:message key='product.quality.label'/>"  id="quality-Label" style="width:180px;display: none; " onclick="rePrintQualityLabel()" />
+          <input type="button" value="<bean:message key='product.shipping.ticket'/>"  id="ticket-printing" style="width:180px;display: none;" onclick="openShippingProductDialog()" />
+        </div>
+        <h3 style="margin:0px;">
+          <img src="${f:url('/img/square.png')}"  style="width:12px; height:12px;">
+          <bean:message key="process"/>:<span id="selectProcessName" style="margin-left:5px;"></span>
+        </h3>
+      </div>
+
+      <div style="margin-top:5px;">
+        <table class="scroll" id="processProductList"></table>
+        <div class="scroll" id="processProductListPager" style="text-align: center;"></div>
+      </div>
+
+      <html:hidden property="productPlanNo" styleId="productPlanNo" />
+      <html:hidden property="processComponentNo" styleId="processComponentNo" />
+      <html:hidden property="barcodeNo" styleId="barcodeNo" />
+      <html:hidden property="serialNo" styleId="serialNo" />
+      <html:hidden property="revision" styleId="revision" />
+      <html:hidden property="statusId" styleId="statusId" />
+      <html:hidden property="processResultJson" styleId="processResultJson" />
+      <html:hidden property="processProductResultJson" styleId="processProductResultJson" />
+      <html:hidden property="selectRowOfProcessGrid" styleId="selectRowOfProcessGrid" />
+
+      <html:hidden property="callerDisplayStartDate" styleId="callerDisplayStartDate" />
+      <html:hidden property="callerDisplayEndDate" styleId="callerDisplayEndDate" />
+
+    </s:form>
+
+  </tiles:put>
+
+</tiles:insert>

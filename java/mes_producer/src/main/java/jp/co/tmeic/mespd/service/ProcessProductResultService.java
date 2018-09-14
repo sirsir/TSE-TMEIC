@@ -1,0 +1,446 @@
+package jp.co.tmeic.mespd.service;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import jp.co.tmeic.mespd.constant.ProductQuality;
+import jp.co.tmeic.mespd.constant.SpecAttribute;
+import jp.co.tmeic.mespd.dto.report.MaterialPlanDto;
+import jp.co.tmeic.mespd.dto.report.MaterialPlanMonthlyDbDto;
+import jp.co.tmeic.mespd.dto.report.MaterialPlanMonthlyDto;
+import jp.co.tmeic.mespd.dto.report.ProductPlanDto;
+import jp.co.tmeic.mespd.dto.report.ProductPlanMonthlyDbDto;
+import jp.co.tmeic.mespd.dto.report.ProductPlanMonthlyDto;
+import jp.co.tmeic.mespd.entity.DMaterialPlan;
+import jp.co.tmeic.mespd.entity.DMaterialProcessResult;
+import jp.co.tmeic.mespd.entity.DMaterialProductResult;
+import jp.co.tmeic.mespd.entity.DProcessProductResult;
+import jp.co.tmeic.mespd.entity.DProcessResult;
+import jp.co.tmeic.mespd.entity.DSerialNo;
+import jp.co.tmeic.mespd.entity.DSpecProductPlan;
+import jp.co.tmeic.mespd.entity.DSpecProductResult;
+import jp.co.tmeic.mespd.exception.MesException;
+import jp.co.tmeic.mespd.utils.DateUtil;
+import jp.co.tmeic.mespd.utils.TimeUtil;
+import jp.co.tmeic.mespd.utils.TimestampUtil;
+
+import org.apache.commons.lang3.StringUtils;
+import org.seasar.extension.jdbc.JdbcManager;
+
+/**
+ * ProcessProductResultServiceのサービスクラスです。
+ *
+ */
+public class ProcessProductResultService {
+
+	@Resource
+	protected JdbcManager jdbcManager;
+
+	@Resource
+	protected DProductResultService dProductResultService;
+
+	@Resource
+	protected DProcessPlanService dProcessPlanService;
+
+	@Resource
+	protected DProcessResultService dProcessResultService;
+
+	@Resource
+	protected DMaterialPlanService dMaterialPlanService;
+
+	@Resource
+	protected DMaterialProcessResultService dMaterialProcessResultService;
+
+	@Resource
+	protected DMaterialProductResultService dMaterialProductResultService;
+
+	@Resource
+	protected DSpecProductPlanService dSpecProductPlanService;
+
+	@Resource
+	protected DSpecProductResultService dSpecProductResultService;
+
+	@Resource
+	protected DProcessProductResultService dProcessProductResultService;
+
+	@Resource
+	protected DSerialNoService dSerialNoService;
+
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNoの状態を開始に変更する。。<br>
+	 * ※製造計画、工程が開始されていない場合は、例外を発生させる。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @return 状態の変更結果
+	 * @exception MesException
+	 */
+	public boolean workStart(String productPlanNo, Integer processComponentNo, String serialNo) throws MesException {
+
+		dProductResultService.processStartPossible(productPlanNo);
+		//System.out.print("--------------------------------------------" );
+		dProcessResultService.productStartPossible(productPlanNo, processComponentNo);
+		
+		registerSerialNo(serialNo);
+		
+		
+
+		boolean isStart = dProcessProductResultService.workStart(productPlanNo, processComponentNo, serialNo);
+
+		if (!isStart) {
+			return false;
+		}
+
+		Integer revision = dProcessProductResultService.getIncompleteMinRevision(productPlanNo, processComponentNo, serialNo);
+
+		List<DMaterialPlan> dMaterialPlans =
+				dMaterialPlanService.findByProcessComponentNo(productPlanNo, processComponentNo);
+
+		for (DMaterialPlan dMaterialPlan : dMaterialPlans) {
+
+			DMaterialProductResult dMaterialProductResult =
+					dMaterialProductResultService.findById(
+							productPlanNo, processComponentNo, serialNo, revision, dMaterialPlan.materialComponentNo);
+
+			if (dMaterialProductResult == null) {
+
+				dMaterialProductResult = new DMaterialProductResult();
+				dMaterialProductResult.productPlanNo = productPlanNo;
+				dMaterialProductResult.processComponentNo = processComponentNo;
+				dMaterialProductResult.serialNo = serialNo;
+				dMaterialProductResult.revision = revision;
+				dMaterialProductResult.materialComponentNo = dMaterialPlan.materialComponentNo;
+				dMaterialProductResult.materialQty = 0;
+
+				dMaterialProductResultService.insert(dMaterialProductResult);
+			}
+		}
+
+		List<DSpecProductPlan> dSpecProductPlans =
+				dSpecProductPlanService.findByProcessComponentNo(productPlanNo, processComponentNo);
+
+		for (DSpecProductPlan dSpecProductPlan : dSpecProductPlans) {
+
+			DSpecProductResult dSpecProductResult =
+					dSpecProductResultService.findById(
+							productPlanNo, processComponentNo, serialNo, revision, dSpecProductPlan.specComponentNo);
+
+			if (dSpecProductResult == null) {
+
+				dSpecProductResult = new DSpecProductResult();
+				dSpecProductResult.productPlanNo = productPlanNo;
+				dSpecProductResult.processComponentNo = processComponentNo;
+				dSpecProductResult.serialNo = serialNo;
+				dSpecProductResult.revision = revision;
+				dSpecProductResult.specComponentNo = dSpecProductPlan.specComponentNo;
+
+				dSpecProductResultService.insert(dSpecProductResult);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNoの状態を完了に変更する。<br>
+	 * 状態が完了の場合は、製品単位の実績を集計して工程の実績に反映する。<br>
+	 * 工程のラベル発行が、有効の場合は、部材ラベルの印刷要求を追加する。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @param userId
+	 *            作業完了ユーザID
+	 * @param userName
+	 *            作業完了ユーザ名
+	 * @return 状態の変更結果
+	 */
+	public boolean workEnd(String productPlanNo, Integer processComponentNo, String serialNo, String userId, String userName) {
+
+		boolean isEnd = dProcessProductResultService.workEnd(productPlanNo, processComponentNo, serialNo, userId, userName);
+
+		if (isEnd) {
+			updateQuality(productPlanNo, processComponentNo);
+			calculateResultCount(productPlanNo, processComponentNo);
+		}
+
+		return isEnd;
+	}
+
+	/**
+	 * 製品単位の実績を集計して工程の実績に反映する。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @return
+	 */
+	public void calculateResultCount(String productPlanNo, Integer processComponentNo) {
+
+		long actualCount = dProcessProductResultService.findActualCount(productPlanNo, processComponentNo);
+		long rejectCount = dProcessProductResultService.findRejectCount(productPlanNo, processComponentNo);
+
+		DProcessResult dProcessResult = new DProcessResult();
+
+		dProcessResult.productPlanNo = productPlanNo;
+		dProcessResult.processComponentNo = processComponentNo;
+		dProcessResult.resultQty = (int) actualCount;
+		dProcessResult.inferiorQty = (int) rejectCount;
+		dProcessResult.productResultLastdate = TimestampUtil.now();
+
+		dProcessResultService.insertOrUpdate(dProcessResult);
+
+		List<DMaterialProcessResult> dMaterialResults =
+				dMaterialProductResultService.findActualSum(productPlanNo, processComponentNo);
+
+		for (DMaterialProcessResult dMaterialResult : dMaterialResults) {
+
+			DMaterialProcessResult dMaterialProcessResult = new DMaterialProcessResult();
+
+			dMaterialProcessResult.productPlanNo = productPlanNo;
+			dMaterialProcessResult.processComponentNo = processComponentNo;
+			dMaterialProcessResult.materialComponentNo = dMaterialResult.materialComponentNo;
+			dMaterialProcessResult.materialQty = dMaterialResult.materialQty;
+
+			dMaterialProcessResultService.insertOrUpdate(dMaterialProcessResult);
+		}
+	}
+
+	/**
+	 * 仕様の合否判定の入力値を品質に反映する。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 */
+	public void updateQuality(String productPlanNo, Integer processComponentNo) {
+
+		List<DSpecProductPlan> specPlans = dSpecProductPlanService.findByIdJoinSpecPlan(productPlanNo, processComponentNo);
+
+		for (DSpecProductPlan specPlan : specPlans) {
+
+			if (specPlan.DSpecPlan.specAttributeId != SpecAttribute.PASS_OR_FAIL) {
+				continue;
+			}
+
+			Map<String, Integer> qualityMap = new HashMap<>();
+			qualityMap.put(StringUtils.trim(specPlan.DSpecPlan.specParts01), ProductQuality.OK);
+			qualityMap.put(StringUtils.trim(specPlan.DSpecPlan.specParts02), ProductQuality.REWORK);
+			qualityMap.put(StringUtils.trim(specPlan.DSpecPlan.specParts03), ProductQuality.REJECT);
+			
+			for (DSpecProductResult specResult : specPlan.DSpecProductResultList) {
+
+				Integer quality = qualityMap.getOrDefault(StringUtils.trim(specResult.inputValue), 0);
+
+				DProcessProductResult dProcessProductResult =
+						dProcessProductResultService.findById(
+								specResult.productPlanNo, specResult.processComponentNo, specResult.serialNo, specResult.revision);
+
+				if (!quality.equals(dProcessProductResult.quality)) {
+
+					dProcessProductResult.quality = quality;
+					dProcessProductResultService.insertOrUpdate(dProcessProductResult);
+				}
+			}
+
+			break;
+		}
+	}
+
+	/**
+	 * 対象日の製造実績を取得します。
+	 *
+	 * @param targetDay
+	 * @return
+	 */
+	public List<ProductPlanDto> findProductResultByDay(Date targetDay) {
+
+		Date startDay = DateUtil.setTime(targetDay, TimeUtil.min());
+		Date endDay = DateUtil.setTime(targetDay, TimeUtil.max());
+
+		Map<String, Object> param = new HashMap<>();
+		param.put("startDay", startDay);
+		param.put("endDay", endDay);
+
+		return jdbcManager.selectBySqlFile(
+				ProductPlanDto.class,
+				"jp/co/tmeic/mespd/service/ProcessProductResultService_findProductResultByDay.sql",
+				param)
+				.getResultList();
+	}
+
+	/**
+	 * 対象月の製造実績を取得します。
+	 *
+	 * @param targetDay
+	 * @return
+	 */
+	public List<ProductPlanMonthlyDto> findProductResultByMonth(Date targetDay) {
+
+		Date startDay = DateUtil.getMonthFirstDay(targetDay);
+		Date endDay = DateUtil.setTime(DateUtil.getMonthLastDay(targetDay), TimeUtil.max());
+
+		Map<String, Object> param = new HashMap<>();
+		param.put("startDay", startDay);
+		param.put("endDay", endDay);
+
+		List<ProductPlanMonthlyDbDto> productPlanMonthlyDtos =
+				jdbcManager.selectBySqlFile(
+						ProductPlanMonthlyDbDto.class,
+						"jp/co/tmeic/mespd/service/ProcessProductResultService_findProductResultByMonth.sql",
+						param)
+						.getResultList();
+
+		Map<String, ProductPlanMonthlyDto> map = new LinkedHashMap<>();
+
+		for (ProductPlanMonthlyDbDto productPlan : productPlanMonthlyDtos) {
+
+			ProductPlanMonthlyDto monthlyDto;
+
+			if (map.containsKey(productPlan.productId)) {
+				monthlyDto = map.get(productPlan.productId);
+
+			} else {
+				monthlyDto = new ProductPlanMonthlyDto();
+				monthlyDto.productId = productPlan.productId;
+				monthlyDto.productName = productPlan.productName;
+				map.put(productPlan.productId, monthlyDto);
+			}
+
+			if (productPlan.resultDate == null) {
+				continue;
+			}
+
+			int day = DateUtil.getDay(productPlan.resultDate) - 1;
+
+			switch (productPlan.quality) {
+				case ProductQuality.OK:
+					monthlyDto.productPlanDtos[day].resultQty++;
+					break;
+
+				case ProductQuality.REJECT:
+					monthlyDto.productPlanDtos[day].inferiorQty++;
+					break;
+			}
+		}
+
+		List<ProductPlanMonthlyDto> list = new ArrayList<>();
+		list.addAll(map.values());
+
+		return list;
+	}
+
+	/**
+	 * 対象日の部材実績を取得します。
+	 *
+	 * @param targetDay
+	 * @return
+	 */
+	public List<MaterialPlanDto> findMaterialResultByDay(Date targetDay) {
+
+		Date startDay = DateUtil.setTime(targetDay, TimeUtil.min());
+		Date endDay = DateUtil.setTime(targetDay, TimeUtil.max());
+
+		Date manufactureStartDate = DateUtil.getMonthFirstDay(targetDay);
+		Date manufactureEndDate = DateUtil.getMonthLastDay(targetDay);
+
+		Map<String, Object> param = new HashMap<>();
+		param.put("startDay", startDay);
+		param.put("endDay", endDay);
+		param.put("manufactureStartDate", manufactureStartDate);
+		param.put("manufactureEndDate", manufactureEndDate);
+
+		return jdbcManager.selectBySqlFile(
+				MaterialPlanDto.class,
+				"jp/co/tmeic/mespd/service/ProcessProductResultService_findMaterialResultByDay.sql",
+				param)
+				.getResultList();
+	}
+
+	/**
+	 * 対象月の部材実績を取得します。
+	 *
+	 * @param targetDay
+	 * @return
+	 */
+	public List<MaterialPlanMonthlyDto> findMaterialResultByMonth(Date targetDay) {
+
+		Date manufactureStartDate = DateUtil.getMonthFirstDay(targetDay);
+		Date manufactureEndDate = DateUtil.getMonthLastDay(targetDay);
+
+		Date endDay = DateUtil.setTime(manufactureEndDate, TimeUtil.max());
+
+		Map<String, Object> param = new HashMap<>();
+		param.put("startDay", manufactureStartDate);
+		param.put("endDay", endDay);
+		param.put("manufactureStartDate", manufactureStartDate);
+		param.put("manufactureEndDate", manufactureEndDate);
+
+		List<MaterialPlanMonthlyDbDto> materialPlanMonthlyDbDtos =
+				jdbcManager.selectBySqlFile(
+						MaterialPlanMonthlyDbDto.class,
+						"jp/co/tmeic/mespd/service/ProcessProductResultService_findMaterialResultByMonth.sql",
+						param)
+						.getResultList();
+
+		Map<String, MaterialPlanMonthlyDto> map = new LinkedHashMap<>();
+
+		for (MaterialPlanMonthlyDbDto materialPlan : materialPlanMonthlyDbDtos) {
+
+			MaterialPlanMonthlyDto monthlyDto;
+
+			if (map.containsKey(materialPlan.materialId)) {
+				monthlyDto = map.get(materialPlan.materialId);
+
+			} else {
+				monthlyDto = new MaterialPlanMonthlyDto();
+				monthlyDto.materialId = materialPlan.materialId;
+				monthlyDto.materialName = materialPlan.materialName;
+				monthlyDto.materialUnit = materialPlan.materialUnit;
+				map.put(materialPlan.materialId, monthlyDto);
+			}
+
+			if (materialPlan.resultDate == null) {
+				continue;
+			}
+
+			int day = DateUtil.getDay(materialPlan.resultDate) - 1;
+
+			monthlyDto.materialPlanDtos[day].materialQty += materialPlan.materialQty;
+		}
+
+		List<MaterialPlanMonthlyDto> list = new ArrayList<>();
+		list.addAll(map.values());
+
+		return list;
+	}
+
+	/** シリアルNo管理登録 */
+	private void registerSerialNo(String serialNo) {
+		
+		
+
+		DSerialNo dSerialNo = dSerialNoService.findById(serialNo);
+
+		if (dSerialNo == null) {
+
+			dSerialNo = new DSerialNo();
+			dSerialNo.serialNo = serialNo;
+
+			dSerialNoService.insert(dSerialNo);
+		}
+	}
+	
+	public boolean checkTime(String productPlanNo, Integer processComponentNo, String serialNo) {
+
+		boolean isEnd = dProcessProductResultService.checkTime(productPlanNo, processComponentNo, serialNo);
+
+		return isEnd;
+	}
+}

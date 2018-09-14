@@ -1,0 +1,213 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
+
+<tiles:insert template="/WEB-INF/view/common/layout.jsp" flush="true">
+
+  <bean:define id="title">
+    <bean:message key="product.result"/>
+  </bean:define>
+
+  <tiles:put name="title" value="${title}"/>
+  <tiles:put name="titleRight">
+    <input type="button" id="autoUpdateButton" value="<bean:message key='automatic.update.stop'/>" onclick="onclickAutoUpdateButton()" style="width: 225px;" />
+  </tiles:put>
+  <tiles:put name="content" type="string">
+
+    <script type="text/javascript" src="${f:url('/js/timerUtils.js')}"></script>
+
+    <jsp:include page="grid.jsp"/>
+
+    <script type="text/javascript">
+
+    var isAutoUpdating = false;
+    var timer = null;
+
+    $(function() {
+      $("#updateButton").button();
+      $("#displayStartDate").datepicker({dateFormat: "dd/mm/yy"});
+      $("#displayEndDate").datepicker({dateFormat: "dd/mm/yy"});
+
+      createGrid();
+      //自動更新設定
+      var interval = parseInt(${interval});
+      var autoUpdate = function () {
+        ajaxPostJson({
+          url: "${f:url('/product/productResult/autoUpdate/')}",
+          data: {
+            displayStartDate : $("#displayStartDate").val(),
+            displayEndDate   : $("#displayEndDate").val()
+          },
+          success:function(data) {
+            if (data.result == "OK") {
+              var productResults = data.productResults;
+              $(productResultGrid.gridId).setGridParam({datatype: "local", data: $.parseJSON(productResults)});
+              $(productResultGrid.gridId).trigger("reloadGrid");
+            } else if (data.result == "NG") {
+              dialogUtils.alert(data.message);
+            }
+          }
+        });
+      };
+
+      var isAutoUpdatingBeforeSubmit = autoUpdateState(${isAutoUpdating});
+      timer = new timerUtils(interval,autoUpdate);
+      changeAutoUpdateMode(isAutoUpdatingBeforeSubmit);
+      selectRow();
+    });
+
+    function selectRow() {
+    	var planNo = $("#selectProductPlanNo").val();
+    	if(planNo.length > 0) {
+    		var grid = $("#productResultList");
+        	var rows = grid.getDataIDs();
+        	for(i=0;i<rows.length;i++){
+        		var rowData = grid.getRowData(rows[i]);
+        		if(planNo == rowData.productPlanNo) {
+        			grid.jqGrid('setSelection', i, true);
+        			break;
+        		}
+        	}
+    	}
+    }
+    function doSearch() {
+      $("#mainForm").attr("action", "${f:url('/product/productResult/')}" + "?productPlanNo=" + $("#selectProductPlanNo").val());
+	  $("#callerDisplayStartDate").val($("#displayStartDate").val());
+	  $("#callerDisplayEndDate").val($("#displayEndDate").val());
+	  $("#mainForm").submit();
+    }
+
+    function autoUpdateState(autoUpdateValue) {
+
+      if (autoUpdateValue == "1") {
+        return true;
+      }
+
+      return false;
+    }
+
+    function reverseAutoUpdateState(autoUpdateValue) {
+
+      if (autoUpdateValue == "1") {
+        return "0";
+      }
+
+      return "1";
+    }
+
+    // 自動更新状態変更
+    function onclickAutoUpdateButton() {
+
+      var isAutoUpdating = $('#isAutoUpdating').val();
+      var doAutoUpdate = autoUpdateState(isAutoUpdating);
+
+      changeAutoUpdateMode(!doAutoUpdate);
+
+      $("#isAutoUpdating").val(reverseAutoUpdateState(isAutoUpdating));
+    }
+
+    // 自動更新停止・再開
+    function changeAutoUpdateMode(doAutoUpdate) {
+
+      if (timer == null){
+        return;
+      }
+
+      if (doAutoUpdate) {
+        timer.start();
+        $("#autoUpdateButton").val("<bean:message key='automatic.update.stop'/>");
+      } else {
+        timer.stop();
+        $("#autoUpdateButton").val("<bean:message key='automatic.update.restart'/>");
+      }
+    }
+
+    function changeStatus(statusId) {
+      var rowId = productResultGrid.selrow();
+
+      if (rowId == null) {
+        dialogUtils.alert("<bean:message key='errors.not.select'/>");
+        return false;
+      }
+
+      <bean:define id="planStart"><bean:message key="start"/></bean:define>
+      <bean:define id="planFinish"><bean:message key="finish"/></bean:define>
+      <bean:define id="planBreak"><bean:message key="break"/></bean:define>
+      <bean:define id="planRestart"><bean:message key="restart"/></bean:define>
+      <bean:define id="planCancel"><bean:message key="plan.cancel"/></bean:define>
+
+      var message = "";
+
+      switch (statusId) {
+        case 'start':
+          message = "<bean:message key="info.do.you.want.to" arg0="${planStart}"/>";
+          break;
+        case 'complete':
+          message = "<bean:message key="info.do.you.want.to" arg0="${planFinish}"/>";
+          break;
+        case 'suspend':
+          message = "<bean:message key="info.do.you.want.to" arg0="${planBreak}"/>";
+          break;
+        case 'restart':
+          message = "<bean:message key="info.do.you.want.to" arg0="${planRestart}"/>";
+          break;
+        case 'stop':
+          message = "<bean:message key="info.do.you.want.to" arg0="${planCancel}"/>";
+          break;
+      }
+
+      dialogUtils.confirm(
+        message,
+        function() {
+          $("#selectProductPlanNo").val($(productResultGrid.gridId).getCell(rowId, "productPlanNo"));
+          $("#selectStatusId").val(statusId);
+          $("#mainForm").attr("action", "${f:url('/product/productResult/changeStatus/')}");
+          $("#mainForm").submit();
+        }
+      );
+    }
+
+    </script>
+
+    <s:form method="post" styleId="mainForm">
+
+      <div style="margin-left: 5px; margin-top:5px; margin-bottom:10px; width:1250px;">
+
+        <div style="display: inline-block; _display: inline;">
+          <bean:message key="product.manifacturedate"/>
+          <html:text property="displayStartDate" styleId="displayStartDate" style=" width: 100px; margin-left: 5px;" />
+          ～
+          <html:text property="displayEndDate" styleId="displayEndDate" style=" width: 100px; margin-right: 5px;" />
+          <tags:SearchButton id="updateButton" onclick="doSearch()"/>
+        </div>
+        
+        <div style="display: inline-block; _display: inline; margin-left: 50px;">
+          <input type="button" value="<bean:message key="select.product"/>" onclick="selectProduct('start')" style="width: 134px;" />
+        </div>
+
+        <div style="display: inline-block; _display: inline; margin-left: 50px;">
+          <input type="button" value="<bean:message key="start"/>" onclick="changeStatus('start')" style="width: 100px;" />
+          <input type="button" value="<bean:message key="finish"/>" onclick="changeStatus('complete')" style="width: 100px;" />
+          <input type="button" value="<bean:message key="break"/>" onclick="changeStatus('suspend')" style="width: 100px;" />
+          <input type="button" value="<bean:message key="restart"/>" onclick="changeStatus('restart')" style="width: 100px;" />
+          <input type="button" value="<bean:message key="plan.cancel"/>" onclick="changeStatus('stop')" style="width: 100px;" />
+          <input type="hidden" id="planNo">
+          
+          <html:hidden property="selectProductPlanNo" styleId="selectProductPlanNo"  />
+          <html:hidden property="selectStatusId" styleId="selectStatusId" />
+          <html:hidden property="isAutoUpdating" styleId="isAutoUpdating" />
+        </div>
+
+      </div>
+
+      <table class="scroll" id="productResultList"></table>
+      <div class="scroll" id="productResultListPager" style="text-align: center;"></div>
+
+      <html:hidden property="callerDisplayStartDate" styleId="callerDisplayStartDate" />
+      <html:hidden property="callerDisplayEndDate" styleId="callerDisplayEndDate" />
+      <html:hidden property="callerSelectProductPlanNo" styleId="callerDisplayEndDate" />
+      
+      <jsp:include page="selectProduct.jsp"/>
+    </s:form>
+
+  </tiles:put>
+
+</tiles:insert>

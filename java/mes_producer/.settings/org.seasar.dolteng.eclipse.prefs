@@ -1,0 +1,8 @@
+DaoType=S2JDBC
+DefaultResourcePath=/MES_Producer/src/main/resources
+DefaultRootPackage=jp.co.tmeic.mespd
+DefaultSrcPath=/MES_Producer/src/main/java
+ServletPath=MES_Producer
+ViewType=SA-Struts
+WebContentsRoot=src/main/webapp
+eclipse.preferences.version=1

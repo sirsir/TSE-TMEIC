@@ -1,0 +1,362 @@
+package jp.co.tmeic.mespd.entity;
+
+import java.sql.Timestamp;
+
+import javax.annotation.Generated;
+
+import jp.co.tmeic.mespd.entity.MBeforeProcessNames._MBeforeProcessNames;
+import jp.co.tmeic.mespd.entity.MMaterialComponentNames._MMaterialComponentNames;
+import jp.co.tmeic.mespd.entity.MProcessNames._MProcessNames;
+import jp.co.tmeic.mespd.entity.MProductNames._MProductNames;
+import jp.co.tmeic.mespd.entity.MSpecProcessComponentNames._MSpecProcessComponentNames;
+import jp.co.tmeic.mespd.entity.MSpecProductComponentNames._MSpecProductComponentNames;
+
+import org.seasar.extension.jdbc.name.PropertyName;
+
+/**
+ * {@link MProcessComponent}のプロパティ名の集合です。
+ * 
+ */
+@Generated(value = {"S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.NamesModelFactoryImpl"})
+public class MProcessComponentNames {
+
+    /**
+     * createDateのプロパティ名を返します。
+     * 
+     * @return createDateのプロパティ名
+     */
+    public static PropertyName<Timestamp> createDate() {
+        return new PropertyName<Timestamp>("createDate");
+    }
+
+    /**
+     * updateDateのプロパティ名を返します。
+     * 
+     * @return updateDateのプロパティ名
+     */
+    public static PropertyName<Timestamp> updateDate() {
+        return new PropertyName<Timestamp>("updateDate");
+    }
+
+    /**
+     * partNoのプロパティ名を返します。
+     * 
+     * @return partNoのプロパティ名
+     */
+    public static PropertyName<String> partNo() {
+        return new PropertyName<String>("partNo");
+    }
+
+    /**
+     * processComponentNoのプロパティ名を返します。
+     * 
+     * @return processComponentNoのプロパティ名
+     */
+    public static PropertyName<Integer> processComponentNo() {
+        return new PropertyName<Integer>("processComponentNo");
+    }
+
+    /**
+     * processIdのプロパティ名を返します。
+     * 
+     * @return processIdのプロパティ名
+     */
+    public static PropertyName<String> processId() {
+        return new PropertyName<String>("processId");
+    }
+
+    /**
+     * processContentsのプロパティ名を返します。
+     * 
+     * @return processContentsのプロパティ名
+     */
+    public static PropertyName<String> processContents() {
+        return new PropertyName<String>("processContents");
+    }
+
+    /**
+     * processTimeのプロパティ名を返します。
+     * 
+     * @return processTimeのプロパティ名
+     */
+    public static PropertyName<Integer> processTime() {
+        return new PropertyName<Integer>("processTime");
+    }
+
+    /**
+     * personnelRequiredのプロパティ名を返します。
+     * 
+     * @return personnelRequiredのプロパティ名
+     */
+    public static PropertyName<Integer> personnelRequired() {
+        return new PropertyName<Integer>("personnelRequired");
+    }
+
+    /**
+     * parallelWorkのプロパティ名を返します。
+     * 
+     * @return parallelWorkのプロパティ名
+     */
+    public static PropertyName<Integer> parallelWork() {
+        return new PropertyName<Integer>("parallelWork");
+    }
+
+    /**
+     * unitSizeのプロパティ名を返します。
+     * 
+     * @return unitSizeのプロパティ名
+     */
+    public static PropertyName<Integer> unitSize() {
+        return new PropertyName<Integer>("unitSize");
+    }
+
+    /**
+     * processOrderのプロパティ名を返します。
+     * 
+     * @return processOrderのプロパティ名
+     */
+    public static PropertyName<Integer> processOrder() {
+        return new PropertyName<Integer>("processOrder");
+    }
+
+    /**
+     * MBeforeProcessListのプロパティ名を返します。
+     * 
+     * @return MBeforeProcessListのプロパティ名
+     */
+    public static _MBeforeProcessNames MBeforeProcessList() {
+        return new _MBeforeProcessNames("MBeforeProcessList");
+    }
+
+    /**
+     * MMaterialComponentListのプロパティ名を返します。
+     * 
+     * @return MMaterialComponentListのプロパティ名
+     */
+    public static _MMaterialComponentNames MMaterialComponentList() {
+        return new _MMaterialComponentNames("MMaterialComponentList");
+    }
+
+    /**
+     * MProcessのプロパティ名を返します。
+     * 
+     * @return MProcessのプロパティ名
+     */
+    public static _MProcessNames MProcess() {
+        return new _MProcessNames("MProcess");
+    }
+
+    /**
+     * MProductのプロパティ名を返します。
+     * 
+     * @return MProductのプロパティ名
+     */
+    public static _MProductNames MProduct() {
+        return new _MProductNames("MProduct");
+    }
+
+    /**
+     * MSpecProcessComponentListのプロパティ名を返します。
+     * 
+     * @return MSpecProcessComponentListのプロパティ名
+     */
+    public static _MSpecProcessComponentNames MSpecProcessComponentList() {
+        return new _MSpecProcessComponentNames("MSpecProcessComponentList");
+    }
+
+    /**
+     * MSpecProductComponentListのプロパティ名を返します。
+     * 
+     * @return MSpecProductComponentListのプロパティ名
+     */
+    public static _MSpecProductComponentNames MSpecProductComponentList() {
+        return new _MSpecProductComponentNames("MSpecProductComponentList");
+    }
+
+    /**
+     * @author S2JDBC-Gen
+     */
+    public static class _MProcessComponentNames extends PropertyName<MProcessComponent> {
+
+        /**
+         * インスタンスを構築します。
+         */
+        public _MProcessComponentNames() {
+        }
+
+        /**
+         * インスタンスを構築します。
+         * 
+         * @param name
+         *            名前
+         */
+        public _MProcessComponentNames(final String name) {
+            super(name);
+        }
+
+        /**
+         * インスタンスを構築します。
+         * 
+         * @param parent
+         *            親
+         * @param name
+         *            名前
+         */
+        public _MProcessComponentNames(final PropertyName<?> parent, final String name) {
+            super(parent, name);
+        }
+
+        /**
+         * createDateのプロパティ名を返します。
+         *
+         * @return createDateのプロパティ名
+         */
+        public PropertyName<Timestamp> createDate() {
+            return new PropertyName<Timestamp>(this, "createDate");
+        }
+
+        /**
+         * updateDateのプロパティ名を返します。
+         *
+         * @return updateDateのプロパティ名
+         */
+        public PropertyName<Timestamp> updateDate() {
+            return new PropertyName<Timestamp>(this, "updateDate");
+        }
+
+        /**
+         * partNoのプロパティ名を返します。
+         *
+         * @return partNoのプロパティ名
+         */
+        public PropertyName<String> partNo() {
+            return new PropertyName<String>(this, "partNo");
+        }
+
+        /**
+         * processComponentNoのプロパティ名を返します。
+         *
+         * @return processComponentNoのプロパティ名
+         */
+        public PropertyName<Integer> processComponentNo() {
+            return new PropertyName<Integer>(this, "processComponentNo");
+        }
+
+        /**
+         * processIdのプロパティ名を返します。
+         *
+         * @return processIdのプロパティ名
+         */
+        public PropertyName<String> processId() {
+            return new PropertyName<String>(this, "processId");
+        }
+
+        /**
+         * processContentsのプロパティ名を返します。
+         *
+         * @return processContentsのプロパティ名
+         */
+        public PropertyName<String> processContents() {
+            return new PropertyName<String>(this, "processContents");
+        }
+
+        /**
+         * processTimeのプロパティ名を返します。
+         *
+         * @return processTimeのプロパティ名
+         */
+        public PropertyName<Integer> processTime() {
+            return new PropertyName<Integer>(this, "processTime");
+        }
+
+        /**
+         * personnelRequiredのプロパティ名を返します。
+         *
+         * @return personnelRequiredのプロパティ名
+         */
+        public PropertyName<Integer> personnelRequired() {
+            return new PropertyName<Integer>(this, "personnelRequired");
+        }
+
+        /**
+         * parallelWorkのプロパティ名を返します。
+         *
+         * @return parallelWorkのプロパティ名
+         */
+        public PropertyName<Integer> parallelWork() {
+            return new PropertyName<Integer>(this, "parallelWork");
+        }
+
+        /**
+         * unitSizeのプロパティ名を返します。
+         *
+         * @return unitSizeのプロパティ名
+         */
+        public PropertyName<Integer> unitSize() {
+            return new PropertyName<Integer>(this, "unitSize");
+        }
+
+        /**
+         * processOrderのプロパティ名を返します。
+         *
+         * @return processOrderのプロパティ名
+         */
+        public PropertyName<Integer> processOrder() {
+            return new PropertyName<Integer>(this, "processOrder");
+        }
+
+        /**
+         * MBeforeProcessListのプロパティ名を返します。
+         * 
+         * @return MBeforeProcessListのプロパティ名
+         */
+        public _MBeforeProcessNames MBeforeProcessList() {
+            return new _MBeforeProcessNames(this, "MBeforeProcessList");
+        }
+
+        /**
+         * MMaterialComponentListのプロパティ名を返します。
+         * 
+         * @return MMaterialComponentListのプロパティ名
+         */
+        public _MMaterialComponentNames MMaterialComponentList() {
+            return new _MMaterialComponentNames(this, "MMaterialComponentList");
+        }
+
+        /**
+         * MProcessのプロパティ名を返します。
+         * 
+         * @return MProcessのプロパティ名
+         */
+        public _MProcessNames MProcess() {
+            return new _MProcessNames(this, "MProcess");
+        }
+
+        /**
+         * MProductのプロパティ名を返します。
+         * 
+         * @return MProductのプロパティ名
+         */
+        public _MProductNames MProduct() {
+            return new _MProductNames(this, "MProduct");
+        }
+
+        /**
+         * MSpecProcessComponentListのプロパティ名を返します。
+         * 
+         * @return MSpecProcessComponentListのプロパティ名
+         */
+        public _MSpecProcessComponentNames MSpecProcessComponentList() {
+            return new _MSpecProcessComponentNames(this, "MSpecProcessComponentList");
+        }
+
+        /**
+         * MSpecProductComponentListのプロパティ名を返します。
+         * 
+         * @return MSpecProductComponentListのプロパティ名
+         */
+        public _MSpecProductComponentNames MSpecProductComponentList() {
+            return new _MSpecProductComponentNames(this, "MSpecProductComponentList");
+        }
+    }
+}

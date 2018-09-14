@@ -1,0 +1,160 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
+
+<script type="text/javascript">
+
+  var grid = new JqGridUtils("#list", "#pager");
+
+  function createGrid() {
+    grid.prop;
+
+    grid.prop.colNames =
+      [
+        'ID',
+        'CRUD',
+        '<bean:message key="product.manifacturedate"/>',
+        '<bean:message key="plan.no"/>',
+        '<bean:message key="part.no"/>',
+        '<bean:message key="part.name"/>',
+        '<bean:message key="product.customer.name"/>',
+        '<bean:message key="product.model"/>',
+        '<bean:message key="plan.qty.br"/>',
+        '<bean:message key="plan.start.time"/>',
+        '<bean:message key="plan.end.time"/>',
+        '<bean:message key="start.time"/>',
+        '<bean:message key="finish.time"/>',
+        '<bean:message key="result.status"/>',
+      ];
+
+    grid.prop.colModel =
+      [
+        { name : 'id', key : true, hidden : true },
+        { name : 'crud',           hidden : true },
+        { name : 'manufactureDate', width : '80', align : 'center', frozen : true, sortable : true, sorttype : 'date', editable : true,  edittype : 'text',   editrules:{required : true}, editoptions: {maxlength: 10, dataInit:grid.datePickerFmatter}},
+        { name : 'productPlanNo',   width : '100', align : 'left',   frozen : true, sortable : true, sorttype : 'text', editable : false, edittype : 'text',   editrules:{required : requiredOfProductPlanNo}, editoptions: {maxlength: 12}},
+        { name : 'partNo',          width : '110', align : 'left',   frozen : true, sortable : true, sorttype : 'text', editable : true,  edittype : 'select', editrules:{required : true}, formatter: 'select',    editoptions:{value : '${f:h(productList)}', 
+        	dataEvents:[{
+            type:"change",
+            fn:function(e){
+            	var rowid = $("#list").jqGrid('getGridParam','selrow');
+            	var id = this.value;
+            	var pd = '${f:h(productDetail)}';
+            	var rows = pd.split("_n-");
+            	for(var i=0; i<rows.length; i++) {
+            		var cols = rows[i].split("\t");
+            		if(cols.length == 4) {
+	            		if(cols[0] == id) {
+	            			$("#list").jqGrid('setCell', rowid, 'partName', cols[1]);
+	            			$("#list").jqGrid('setCell', rowid, 'customerName', cols[2]);
+	            			$("#list").jqGrid('setCell', rowid, 'model', cols[3]);
+	            			break;
+	            		}
+            		}
+            	}
+            }
+        }]}},
+        { name : 'partName',        width : '110', align : 'left',   frozen : true, sortable : true, sorttype : 'text', editable : false, edittype : 'text',   editrules:{required : requiredOfProductPlanNo}, editoptions: {maxlength: 12}},
+        { name : 'customerName',    width : '110', align : 'left',   frozen : true, sortable : true, sorttype : 'text', editable : false, edittype : 'text',   editrules:{required : requiredOfProductPlanNo}, editoptions: {maxlength: 12}},
+        { name : 'model',           width : '100', align : 'left',   frozen : true, sortable : true, sorttype : 'text', editable : false, edittype : 'text',   editrules:{required : requiredOfProductPlanNo}, editoptions: {maxlength: 12}},
+        { name : 'planQty',         width : '50', align : 'right',  frozen : true, sortable : true, sorttype : 'int',  editable : true,  edittype : 'text',   editrules:{required : true}, editoptions: {maxlength: '${planQtyMaxLength}'}},
+        { name : 'planStartTime',   width : '50', align : 'center', frozen : true, sortable : true, sorttype : 'date', editable : true,  edittype : 'custom', editrules:{required : true}, formatter: timeFmatter, editoptions:{custom_element: timeElement, custom_value: timeValue, maxlength: 4}},
+        { name : 'planEndDate',     width : '110', align : 'center', frozen : true, sortable : true, sorttype : 'date', editable : false, formatter: dateTimeFmatter},
+        { name : 'startDatetime',   width : '110', align : 'center', frozen : true, sortable : true, sorttype : 'date', editable : false, formatter: dateTimeFmatter},
+        { name : 'endDatetime',     width : '110', align : 'center', frozen : true, sortable : true, sorttype : 'date', editable : false, formatter: dateTimeFmatter},
+        { name : 'status',          width : '100', align : 'center', frozen : true, sortable : true, sorttype : 'text', editable : false, edittype : 'select', formatter:'select', editoptions:{value : '${f:h(productStatus)}'}, cellattr: statusStyleFmatter },
+      ];
+
+    grid.pkey = ['productPlanNo'];
+
+    grid.prop.data =
+      [
+        {'manufactureDate' : '2015/05/11', 'productPlanNo' : '1505110001', 'partNo' : '1','partName': 'xxxx','customerName': 'xxxx','model': 'xxxx',  'planQty' : '9999', 'planStartDate' : '0915', 'planEndDate' : '2015/05/11 13:00', 'startDatetime' : '2014/05/11 09:20', 'endDatetime' : '2014/05/11 12:00', 'resultStatus' : 'finish'},
+      ];
+
+    grid.prop.data = ${productPlanJson};
+    grid.prop.width = 1180;
+    grid.prop.height = 520;
+
+    grid.edit(${f:url('/')});
+
+    var defaultGridComplete = grid.prop.gridComplete;
+
+    grid.prop.gridComplete = function () {
+
+      changeBackgroundColorByStatus(grid);
+      defaultGridComplete();
+
+    };
+
+    grid.prop.onSelectRowEx = function (rowId){
+
+      var result = {"canEdit":false};
+
+      if (rowId == null) {
+        return result;
+      }
+
+      if ($(grid.gridId).getCell(rowId, "status")) {
+
+        if (grid.lastsel != null) {
+          $(grid.gridId).restoreRow(grid.lastsel);
+        }
+
+        $(grid.gridId).resetSelection();
+
+        return result;
+      }
+
+    };
+
+    $(grid.gridId).jqGrid(grid.prop);
+  }
+
+  var statusStyleFmatter = function(rowId, val, rawObject, cm, rdata, name){
+
+    if (!rdata.status){
+      return "";
+    }
+
+    var color = productStatusColor[rdata.status];
+
+    return  'style="color: ' + color + ';"';
+  }
+
+  function timeElement(value, options) {
+    var el = document.createElement("input");
+    el.type = "text";
+    el.maxLength = 4;
+    el.value = value.replace(":", "");
+    grid.timePickerFmatter(el, "HHmm");
+    return el;
+  }
+
+  function timeValue(elem, operation, value) {
+
+    if(operation === 'get') {
+       $(elem).val(("0000" + $(elem).val()).slice(-4));
+       return $(elem).val();
+
+    } else if(operation === 'set') {
+      return $(elem).val(value.replace(":", ""));
+    }
+  }
+
+  timeFmatter = function(cellvalue, options, rowObject) {
+
+    if (cellvalue == null) { return ""; }
+
+    if (cellvalue.match(/:/)) {
+      return cellvalue;
+    }
+
+    return cellvalue.substring(0,2) + ":" + cellvalue.substring(2,4);
+  }
+
+   dateTimeFmatter = function(cellvalue, options, rowObject) {
+
+     if (cellvalue == null) { return ""; }
+
+     return cellvalue.substring(0,16);
+   }
+</script>

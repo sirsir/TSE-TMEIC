@@ -1,0 +1,162 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
+
+<tiles:insert template="/WEB-INF/view/common/layout.jsp" flush="true">
+
+  <bean:define id="title">
+    <bean:message key="master.product"/>
+  </bean:define>
+
+  <tiles:put name="title" value="${title}"/>
+  <tiles:put name="content" type="string">
+
+    <jsp:include page="grid.jsp"/>
+
+    <script type="text/javascript">
+    $(function() {
+
+      createProductGrid();
+      createProcessGrid();
+      createSpecProductGrid();
+      createSpecProcessGrid();
+      createMaterialGrid();
+    });
+
+    function addRow() {
+      productGrid.addRow();
+    }
+
+    function doSearch() {
+      $("#mainForm").attr("action", "${f:url('/master/product/')}");
+      $("#mainForm").submit();
+    }
+
+    function doRegister() {
+
+      dialogUtils.confirm(
+        "<bean:message key='info.register'/>",
+        function() {
+
+          processOrderResetting();
+          if (!materialGrid.prop.saveEditRow(materialGrid.lastSelRowId)) return;
+          if (!specProductGrid.prop.saveEditRow(specProductGrid.lastSelRowId)) return;
+          if (!specProcessGrid.prop.saveEditRow(specProcessGrid.lastSelRowId)) return;
+          if (!processGrid.prop.saveEditRow(processGrid.lastSelRowId)) return;
+          if (!productGrid.prop.saveEditRow(productGrid.lastSelRowId)) return;
+
+          var sendData = productGrid.getUpdateData();
+
+          ajaxPostJson({
+            url: "${f:url('/master/product/register/')}",
+            data: {
+              productJson : JSON.stringify(sendData)
+            }
+          });
+        }
+      );
+    }
+
+    function doDelete() {
+
+      var rowId = productGrid.selrow();
+
+      if (rowId == null) {
+        dialogUtils.alert("<bean:message key='errors.not.select'/>");
+        return false;
+      }
+
+      dialogUtils.confirm(
+        "<bean:message key='info.delete'/>",
+        function() {
+          if (productGrid.deleteRow(rowId)) {
+            return false;
+          } else {
+            ajaxPostJson({
+              url: "${f:url('/master/product/delete/')}",
+              data: {
+                deletePartId : $(productGrid.gridId).getCell(rowId, "partNo")
+              }
+            });
+          }
+        }
+      );
+    }
+
+    function upProcess() {
+      processGrid.upData();
+    }
+
+    function downProcess() {
+      processGrid.downData();
+    }
+
+    function processOrderResetting() {
+      var i = 1;
+      $.each($(processGrid.gridId).jqGrid('getRowData'), function (key, data) {
+        $(processGrid.gridId).jqGrid('getRowData')
+        $(processGrid.gridId).setCell(data.id, "processOrder", i++);
+      });
+    }
+    </script>
+
+    <s:form method="post" styleId="mainForm">
+
+      <div style="display: table;">
+        <div style="height: 33px; vertical-align: bottom; display: table-cell;">
+          <img src="${f:url('/img/square.png')}">
+          <span style="margin-left: 10px; font-size: 20px; font-weight: bold;"><bean:message key="product"/></span>
+        </div>
+
+        <div style="padding-left: 170px; display: table-cell;">
+          <input type="button" value="<bean:message key="add"/>" onclick="addRow()" />
+          <input type="button" value="<bean:message key="copy"/>" onclick="productCopy()" />
+          <input type="button" value="<bean:message key="register"/>" onclick="doRegister()" />
+          <input type="button" value="<bean:message key="delete"/>" onclick="doDelete()" />
+        </div>
+      </div>
+
+      <div style="margin-top: 10px;"></div>
+
+      <table class="scroll" id="productList"></table>
+
+      <div style="margin-top: 5px;"></div>
+
+      <div style="display: table;">
+        <div style="display: table-cell; font-size: 30px; font-weight: bold; width: 630px;">
+          <img src="${f:url('/img/square.png')}">
+          <span style="font-size: 20px;"><bean:message key="product"/></span>:
+          <span id="selectProduct" style="font-size: 20px;"></span>
+          <span style="font-size: 20px;"><bean:message key="process"/></span>
+        </div>
+        <div style="display: table-cell;">
+          <input type="button" value="▲" onclick="upProcess();">
+          <input type="button" value="▼" onclick="downProcess();">
+        </div>
+      </div>
+
+      <div style="margin-top: 5px;"></div>
+
+      <table class="scroll" id="processList"></table>
+
+      <div style="margin: 10px 0px;"></div>
+
+      <table>
+        <tr>
+          <td style="padding-right:10px;">
+            <table class="scroll" id="specProcessList"></table>
+          </td>
+          <td style="padding-right:10px;">
+            <table class="scroll" id="specProductList"></table>
+          </td>
+          <td>
+            <table class="scroll" id="materialList"></table>
+          </td>
+        </tr>
+      </table>
+
+      <jsp:include page="copyDialog.jsp"/>
+
+    </s:form>
+
+  </tiles:put>
+
+</tiles:insert>

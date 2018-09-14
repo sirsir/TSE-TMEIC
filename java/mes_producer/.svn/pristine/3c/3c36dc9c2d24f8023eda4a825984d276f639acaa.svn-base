@@ -1,0 +1,270 @@
+/*
+jQuery.ganttView v.0.7.2
+Copyright (c) 2010 JC Grubbs - jc.grubbs@devmynd.com
+MIT License Applies
+*/
+
+div.ganttview-hzheader-month,
+div.ganttview-hzheader-day,
+div.ganttview-hzheader-dow,
+div.ganttview-hzheader-hour {
+	float: left;
+	text-align: center;
+
+}
+div.ganttview-vtheader,
+div.ganttview-vtheader-item-name,
+div.ganttview-vtheader-series,
+div.ganttview-grid,
+div.ganttview-grid-row-cell {
+	float: left;
+}
+
+
+div.ganttview-grid-row-cell.last,
+div.ganttview-hzheader-hour.last,
+div.ganttview-hzheader-day.last,
+div.ganttview-hzheader-month.last {
+	border-right: 1px solid #999;
+}
+
+div.ganttview {
+    background-color: #ffffff;
+	border: 1px solid #999;
+}
+
+
+/* Horizontal Header */
+
+div.ganttview-hzheader-month {
+	width: 60px;
+	height: 20px;
+	border-right: 1px solid #d0d0d0;
+	line-height: 20px;
+	font-size: 16px;
+	font-weight: bold;
+    background-color: #ffffff;
+}
+
+div.ganttview-hzheader-dow,
+div.ganttview-hzheader-day {
+	width: 60px;
+	height: 20px;
+	border-right: 1px solid #ffffff;
+	border-top: 1px solid #000000;
+	line-height: 20px;
+	color: #777;
+    text-align: center;
+	font-size: 16px;
+	font-weight: bold;
+    background-color: #ffffff;
+}
+div.ganttview-hzheader-hour {
+	width: 60px;
+	height: 20px;
+	border-right: 1px solid #d0d0d0;
+	border-top: 1px solid #000000;
+	line-height: 20px;
+	color: #777;
+    text-align: center;
+}
+
+div.ganttview-hzheader-dow.ganttview-saturday,
+div.ganttview-hzheader-day.ganttview-saturday {
+    background-color: #f0f8ff;
+}
+
+div.ganttview-hzheader-dow.ganttview-sunday,
+div.ganttview-hzheader-day.ganttview-sunday {
+    background-color: #ffe4e1;
+}
+
+
+/* Vertical Header */
+
+div.ganttview-vtheader {
+	margin-top: 20px;
+	width: 200px;
+    background-color: #ffffff;
+}
+
+div.ganttview-vtheader-slide-container {
+	overflow: auto;
+}
+
+div.ganttview-vtheader-item {
+	color: #666;
+	cursor: pointer;
+	border-top: 1px solid #000000;
+}
+
+div.ganttview-vtheader-item-sub {
+	color: #666;
+	cursor: pointer;
+}
+
+div.ganttview-vtheader-item-name {
+	width: 195px;
+	padding-left: 5px;
+	line-height: 12px;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+div.ganttview-vtheader-item-sub-name {
+	width: 195px;
+	padding-left: 5px;
+	line-height: 12px;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+div.ganttview-vtheader-series-name {
+	width: 80px;
+	height: 21px;
+	border-top: 1px solid #d0d0d0;
+	line-height: 16px;
+	padding-left: 5px;
+}
+
+div.ganttview-vtheader-item-name-selected {
+    background-color: #fff5ee !important
+}
+
+div.ganttview-vtheader-series-name-selected {
+    background-color: #fff5ee !important
+}
+
+
+/* Slider */
+
+div.ganttview-slide-container {
+	overflow: auto;
+	border-left: 1px solid #999;
+}
+
+
+/* Grid */
+
+div.ganttview-grid-row-cell {
+	border-top: 1px solid #000000;
+	border-right: 1px solid #000000;
+}
+
+div.ganttview-grid-row-even {
+  background: #ced6ea;
+}
+
+div.ganttview-grid-row-odd {
+  background: #ffffff;
+}
+
+div.ganttview-grid-row-cell.ganttview-weekend {
+	background-color: #fafafa;
+}
+
+div.ganttview-grid-row-cell.ganttview-saturday {
+    background-color: #f0f8ff;
+}
+
+div.ganttview-grid-row-cell.ganttview-sunday {
+    background-color: #ffe4e1;
+}
+
+div.ganttview-grid-row-cell-selected {
+    background-color: #fff5ee !important
+}
+
+
+/* Blocks */
+
+div.ganttview-blocks {
+	margin-top: 20px;
+}
+
+div.ganttview-blocks.ganttview-with-day-of-week {
+    padding-top: 21px;
+}
+
+div.ganttview-block-container {
+	height: 18px;
+	padding-top: 4px;
+}
+
+div.ganttview-block {
+	position: relative;
+	height: 15px;
+	background-color: #ff0000;
+	border: 1px solid #c0c0c0;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+
+div.ganttview-block.ganttview-blue {
+    background-color:  #0000ff;
+}
+
+div.ganttview-block.ganttview-rad {
+    background-color:  #ff0000;
+}
+
+div.ganttview-block.ganttview-orange {
+    background-color:  #ffa500;
+}
+
+div.ganttview-block-text {
+	position: absolute;
+	height: 12px;
+	font-size: 0.8em;
+	color:  #ffffff;
+	padding: 2px 3px;
+}
+
+div.ganttview-block-selected {
+}
+
+div.ganttview-now-container {
+	position: relative;
+	margin-top: 0px;
+}
+
+div.ganttview-now {
+	position: absolute;
+	margin-top: -21px;
+	margin-left: 40px;
+	height: 0px;
+	border: 1px solid #ff0000;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+div.ganttview-now.ganttview-with-day-of-week {
+    padding-top: 21px;
+}
+
+div.ganttview-color-table {
+	background-color: #ffffff;
+	border: 1px solid #777;
+	width: 260px;
+}
+
+div.ganttview-color-table table {
+	margin-left: 5px;
+	width: 250px;
+}
+
+div.ganttview-color-table tr {
+	height: 25px;
+}
+
+div.ganttview-color-table td {
+	width: 80px;
+	color: #ffffff;
+	text-align: center;
+}
+div.ganttview-color-table div {
+	font-weight: bold;
+	height: 16px;
+	font-size: 12px;
+}

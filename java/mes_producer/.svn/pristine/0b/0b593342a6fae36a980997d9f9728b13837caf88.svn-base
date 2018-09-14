@@ -1,0 +1,338 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package jp.co.tmeic.mespd.action.product;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+
+import jp.co.tmeic.mespd.action.AbstractAction;
+import jp.co.tmeic.mespd.constant.NoNumberingMethod;
+import jp.co.tmeic.mespd.dto.jqgrid.product.DShippingDto;
+import jp.co.tmeic.mespd.entity.DShippingPlan;
+import jp.co.tmeic.mespd.exception.ValidationException;
+import jp.co.tmeic.mespd.form.product.ShippingForm;
+import jp.co.tmeic.mespd.service.DShippingService;
+import jp.co.tmeic.mespd.service.MProductService;
+import jp.co.tmeic.mespd.service.ShippingService;
+import jp.co.tmeic.mespd.utils.BrowserMsg;
+import jp.co.tmeic.mespd.utils.DateUtil;
+import jp.co.tmeic.mespd.utils.JSONUtil;
+import jp.co.tmeic.mespd.utils.JqgridUtil;
+import jp.co.tmeic.mespd.utils.JqueryUtil;
+import jp.co.tmeic.mespd.utils.SystemParameterUtil;
+import jp.co.tmeic.mespd.utils.ValidateUtil;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.log4j.Logger;
+import org.seasar.framework.beans.util.Beans;
+import org.seasar.sastruts.example.annotation.Auth;
+import org.seasar.struts.annotation.ActionForm;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.util.MessageResourcesUtil;
+
+@Auth
+public class ShippingAction extends AbstractAction {
+
+	/** Logger */
+	private Logger logger = Logger.getLogger(getClass());
+
+	/** UserTransaction */
+	public UserTransaction userTransaction;
+
+	/** ActionForm */
+	@Resource
+	@ActionForm
+	protected ShippingForm shippingForm;
+
+	@Resource
+	protected MProductService mProductService;
+
+	@Resource
+	protected DShippingService dShippingService;
+
+	@Resource
+	protected ShippingService shippingService;
+
+	@Execute(validator = false)
+	public String index() throws ParseException {
+
+		try {
+
+			shippingForm.planQtyMaxLength = String.valueOf(SystemParameterUtil.productQuantityMaxLength());
+			shippingForm.shippingNoNumberingMethod = String.valueOf(SystemParameterUtil.shippingNoNumberingMethod());
+			//shippingForm.productStatus = ProductStatus.getStatus(locale());
+			shippingForm.mProducts = mProductService.findAllOrderById();
+
+			if (StringUtils.isBlank(shippingForm.displayStartDate)) {
+
+				// 初回表示は本日
+				shippingForm.displayStartDate = DateUtil.now("dd/MM/yyyy");
+				shippingForm.displayEndDate = DateUtil.now("dd/MM/yyyy");
+			}
+
+			indexValidate(shippingForm);
+
+			List<DShippingDto> dShippingDtos =
+					shippingService.findByShippingDate(
+							DateUtil.toDate(shippingForm.displayStartDate),
+							DateUtil.toDate(shippingForm.displayEndDate));
+			
+			shippingForm.shippingJson = JSONUtil.encode(JqgridUtil.init(dShippingDtos));
+		} catch (IllegalStateException ex) {
+			ex.printStackTrace();
+			shippingForm.shippingJson = "[]";
+
+			BrowserMsg.toAlert(ex.getMessage());	
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			logger.error("Exception", ex);
+		}
+
+		return "index.jsp";
+	}
+
+	/**
+	 * 検索処理が可能か検証を行う。
+	 *
+	 * @param dShippingDtos
+	 * @throws ParseException
+	 */
+	private void indexValidate(ShippingForm form) {
+
+		ValidateUtil.date("shipping.date", form.displayStartDate);
+		ValidateUtil.date("shipping.date", form.displayEndDate);
+
+		int displayDays = SystemParameterUtil.productDisplayDays();
+
+		//try {
+			long days = DateUtil.days(DateUtil.toDate(form.displayStartDate), DateUtil.toDate(form.displayEndDate));
+
+			if (days > displayDays) {
+
+				throw new IllegalStateException(
+						MessageResourcesUtil.getMessage(locale(), "errors.out.of.range",
+								MessageResourcesUtil.getMessage(locale(), "shipping.date")));
+			}
+
+		//} catch (ParseException ex) {
+			// 事前に日付型チェック済み
+		//}
+	}
+
+	/** 登録 */
+	@Execute(validator = false)
+	public String register() {
+
+		Map<String, String> json = new HashMap<>();
+
+		boolean isCommit = false;
+
+		try {
+			List<DShippingDto> dShippingLst = JSONUtil.decode(shippingForm.shippingJson, DShippingDto[].class);
+
+			registerValidate(dShippingLst);
+			registerExe(dShippingLst);
+
+			json.put("result", "OK");
+
+			isCommit = true;
+
+		} catch (ValidationException ex) {
+			json.put("result", "NG");
+			json.put("message", ex.getMessage());
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+			json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.register"));
+		} finally {
+
+			if (!isCommit) {
+				try {
+					userTransaction.setRollbackOnly();
+				} catch (IllegalStateException | SystemException ex) {
+					logger.error("Exception", ex);
+				}
+			}
+
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+	/**
+	 * 登録可能か検証を行う。
+	 *
+	 * @param shippingLst
+	 * @throws ParseException
+	 */
+	private void registerValidate(List<DShippingDto> shippingLst) throws ParseException {
+
+		for (DShippingDto shipping : shippingLst) {
+
+			validateShippingNo(shipping.crud, shipping.shippingNo);
+			
+			ValidateUtil.required("shipping.date", shipping.shippingDate);
+			ValidateUtil.date("shipping.date", shipping.shippingDate);
+
+			Date startDate = DateUtil.toDate(shippingForm.displayStartDate);
+			Date endDate = DateUtil.toDate(shippingForm.displayEndDate);
+			Date shippingDate = DateUtil.toDate(shipping.shippingDate);
+
+			ValidateUtil.outOfRange("shipping.date", startDate, endDate, shippingDate);
+
+			ValidateUtil.required("product.code", shipping.partNo);
+			ValidateUtil.maxlength("product.code", shipping.partNo, 10);
+
+			ValidateUtil.required("plan.qty", shipping.planQty);
+			ValidateUtil.maxlength("plan.qty", shipping.planQty, SystemParameterUtil.productQuantityMaxLength());
+			
+			/*ValidateUtil.required("shipping.qty", shipping.shippingQty);
+			ValidateUtil.maxlength("shipping.qty", shipping.shippingQty, SystemParameterUtil.productQuantityMaxLength());*/
+
+			//ValidateUtil.required("plan.start.time", shipping.planStartTime);
+			//ValidateUtil.maxlength("plan.start.time", shipping.planStartTime, 4);
+			//ValidateUtil.integer("plan.start.time", shipping.planStartTime);
+		}
+	}
+
+	/**
+	 * 検証を行う。
+	 *
+	 * @param crud
+	 * @param shippingNo
+	 */
+	private void validateShippingNo(String crud, String shippingNo) {
+
+		int shippingNoNumberingMethod = SystemParameterUtil.shippingNoNumberingMethod();
+
+		// 自動採番時は未入力許可
+		boolean isNonCheck =
+				shippingNoNumberingMethod == NoNumberingMethod.AUTO
+						&& StringUtils.equals(crud, "C")
+						&& StringUtils.isBlank(shippingNo);
+
+		if (isNonCheck) {
+			return;
+		}
+
+		ValidateUtil.required("shipping.no", shippingNo);
+		ValidateUtil.maxlength("shipping.no", shippingNo, 12);
+
+		// Noの重複チェック(新規)
+		boolean isShippingNoDuplicate = StringUtils.equals(crud, "C") && dShippingService.isExist(shippingNo);
+
+		if (isShippingNoDuplicate) {
+			ValidateUtil.duplicate("shipping.no");
+		}
+
+		/*if (!dShippingService.isUpdatable(shippingNo)) {
+			// 生産を開始している場合編集不可
+			throw new IllegalStateException(MessageResourcesUtil.getMessage(locale(), "errors.editing.disabled"));
+		}*/
+	}
+
+	/**
+	 * 登録実行
+	 *
+	 * @param shippingLst
+	 *            登録製造計画リスト
+	 *
+	 * @throws ParseException
+	 *             異常
+	 */
+	private void registerExe(List<DShippingDto> shippingLst) throws ParseException {
+
+		for (DShippingDto shipping : shippingLst) {
+
+			DShippingPlan dShipping = Beans.createAndCopy(DShippingPlan.class, shipping).execute();
+			dShipping.shippingDate = new java.sql.Date(DateUtils.parseDate(shipping.shippingDate, "dd/MM/yyyy").getTime());
+
+
+			switch (shipping.crud) {
+				case "C":
+
+					if (StringUtils.isBlank(dShipping.shippingNo)) {
+						dShipping.shippingNo = dShippingService.createShippingNo(dShipping.shippingDate);
+					}
+
+					dShippingService.insert(dShipping);
+					dShippingService.insertShippingResult(dShipping.shippingNo, shipping.resultQty);
+					break;
+
+				case "U":
+					dShippingService.update(dShipping);
+					dShippingService.updateShippingResult(dShipping.shippingNo, shipping.resultQty);
+					break;
+			}
+
+			// 終了時刻更新
+			//shippingService.updateAndCalculatePlanEndDate(dShipping.shippingNo);
+		}
+	}
+
+	/** 削除 */
+	@Execute(validator = false)
+	public String delete() {
+
+		Map<String, String> json = new HashMap<>();
+
+		boolean isCommit = false;
+
+		try {
+			String shippingNo = request.getParameter("deleteShippingNo");
+
+			/*if (!dProductPlanService.isDeletable(productPlanNo)) {
+				json.put("result", "NG");
+				json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.delete"));
+				return null;
+			}*/
+
+			dShippingService.deleteById(shippingNo);
+
+			json.put("result", "OK");
+
+			isCommit = true;
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+			json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.delete"));
+		} finally {
+
+			if (!isCommit) {
+				try {
+					userTransaction.setRollbackOnly();
+				} catch (IllegalStateException | SystemException ex) {
+					logger.error("Exception", ex);
+				}
+			}
+
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+}

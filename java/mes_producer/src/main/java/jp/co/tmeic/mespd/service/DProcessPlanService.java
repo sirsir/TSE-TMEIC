@@ -1,0 +1,177 @@
+package jp.co.tmeic.mespd.service;
+
+import static jp.co.tmeic.mespd.entity.DProcessPlanNames.*;
+import static jp.co.tmeic.mespd.entity.MProcessNames.processName;
+import static org.seasar.extension.jdbc.operation.Operations.*;
+
+import java.util.List;
+
+import javax.annotation.Generated;
+
+import jp.co.tmeic.mespd.dto.jqgrid.product.VDBarcodeAssociationDbDto;
+import jp.co.tmeic.mespd.entity.DProcessPlan;
+import jp.co.tmeic.mespd.entity.MProcessComponent;
+
+import org.seasar.extension.jdbc.where.SimpleWhere;
+
+/**
+ * {@link DProcessPlan}のサービスクラスです。
+ *
+ */
+@Generated(value = { "S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl" })
+public class DProcessPlanService extends AbstractService<DProcessPlan> {
+
+	/**
+	 * 識別子でエンティティを検索します。
+	 *
+	 * @param productPlanNo
+	 *            識別子
+	 * @param processComponentNo
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public DProcessPlan findById(String productPlanNo, Integer processComponentNo) {
+		return select().id(productPlanNo, processComponentNo).getSingleResult();
+	}
+
+	/**
+	 * 識別子の昇順ですべてのエンティティを検索します。
+	 *
+	 * @return エンティティのリスト
+	 */
+	public List<DProcessPlan> findAllOrderById() {
+		return select().orderBy(asc(productPlanNo()), asc(processComponentNo())).getResultList();
+	}
+	
+	
+	/**
+	 * 工程名の昇順ですべてのエンティティを検索します。
+	 *
+	 * @return エンティティのリスト
+	 */
+	public MProcessComponent findByProcessName(String processName) {
+		//return select().processName(processName).getSingleList();
+		//return select().where(new SimpleWhere().eq(processName(), processName)).getSingleResult();
+		MProcessComponent mm = jdbcManager
+				.selectBySql(
+						MProcessComponent.class,
+						"select d.* From m_process_component d where d.process_id=(select process_id from m_process m where m.process_name=?) LIMIT 1"
+						,processName)
+				.getSingleResult();
+		System.out.println(mm.processId);
+		
+		return mm;
+	}
+	
+	
+
+	/**
+	 * 製造計画No、工程Noでエンティティを検索します。
+	 *
+	 * @param productPlanNo
+	 *            製造計画No
+	 * @param processComponentNo
+	 *            工程No
+	 * @return エンティティ
+	 */
+	public DProcessPlan findByProcessComponentNo(String productPlanNo, Integer processComponentNo) {
+		return select()
+				.leftOuterJoin(DProcessResult())
+				.leftOuterJoin(DProductPlan())
+				.id(productPlanNo, processComponentNo)
+				.getSingleResult();
+	}
+
+	/**
+	 *
+	 * 製造計画Noでエンティティを検索します。
+	 *
+	 * @param productPlanNo
+	 *            製造計画No
+	 * @return エンティティのリスト
+	 */
+	public List<DProcessPlan> findOrderByProcessIdFromProductPlanNo(String productPlanNo) {
+		return select()
+				.where(new SimpleWhere().eq(productPlanNo(), productPlanNo))
+				.orderBy(asc(processComponentNo()))
+				.getResultList();
+	}
+
+	/**
+	 * 識別子でエンティティを検索します。
+	 *
+	 * @param productPlanNo
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public List<DProcessPlan> findProcessesByProductPlanNo(String productPlanNo) {
+
+		return select()
+				.leftOuterJoin(DProcessResult())
+				.leftOuterJoin(DSpecProcessPlanList())
+				.leftOuterJoin(DSpecProcessPlanList().DSpecProcessResult())
+				.leftOuterJoin(DSpecProcessPlanList().DSpecPlan())
+				.leftOuterJoin(DSpecProcessPlanList().DSpecPlan().DSpecAttributePlan())
+				.leftOuterJoin(DMaterialPlanList())
+				.leftOuterJoin(DMaterialPlanList().DMaterialProcessResult())
+				.where(new SimpleWhere().eq(productPlanNo(), productPlanNo))
+				.orderBy(
+						asc(processComponentNo()),
+						asc(DSpecProcessPlanList().displayOrder()),
+						asc(DMaterialPlanList().displayOrder())
+				)
+				.getResultList();
+	}
+
+	/**
+	 * 識別子で計画を検索します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public DProcessPlan findPlansById(String productPlanNo, int processComponentNo) {
+
+		return select()
+				.leftOuterJoin(DSpecProcessPlanList())
+				.leftOuterJoin(DSpecProcessPlanList().DSpecPlan())
+				.leftOuterJoin(DSpecProcessPlanList().DSpecPlan().DSpecAttributePlan())
+				.leftOuterJoin(DSpecProductPlanList())
+				.leftOuterJoin(DSpecProductPlanList().DSpecPlan())
+				.leftOuterJoin(DSpecProductPlanList().DSpecPlan().DSpecAttributePlan())
+				.leftOuterJoin(DMaterialPlanList())
+				.where(new SimpleWhere()
+						.eq(productPlanNo(), productPlanNo)
+						.eq(processComponentNo(), processComponentNo))
+				.orderBy(
+						asc(DSpecProcessPlanList().displayOrder()),
+						asc(DSpecProductPlanList().displayOrder()),
+						asc(DMaterialPlanList().displayOrder()))
+				.getSingleResult();
+	}
+
+	/**
+	 * 製造計画の最終工程の工程構成Noを取得します。
+	 *
+	 * @param productPlanNo
+	 *            製造計画No
+	 * @return 最終工程の工程構成No
+	 */
+	public Integer findLastProcessesComponentNo(String productPlanNo) {
+
+		DProcessPlan dProcessPlan =
+				select()
+						.where(new SimpleWhere().eq(productPlanNo(), productPlanNo))
+						.orderBy(desc(processComponentNo()))
+						.limit(1)
+						.getSingleResult();
+
+		if (dProcessPlan == null) {
+			return null;
+		}
+
+		return dProcessPlan.processComponentNo;
+	}
+
+}

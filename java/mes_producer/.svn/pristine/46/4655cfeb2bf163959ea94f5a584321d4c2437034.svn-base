@@ -1,0 +1,36 @@
+package jp.co.tmeic.mespd.service;
+
+import java.util.List;
+import javax.annotation.Generated;
+import jp.co.tmeic.mespd.entity.MPrinter;
+
+import static jp.co.tmeic.mespd.entity.MPrinterNames.*;
+import static org.seasar.extension.jdbc.operation.Operations.*;
+
+/**
+ * {@link MPrinter}のサービスクラスです。
+ * 
+ */
+@Generated(value = {"S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl"})
+public class MPrinterService extends AbstractService<MPrinter> {
+
+    /**
+     * 識別子でエンティティを検索します。
+     * 
+     * @param printerId
+     *            識別子
+     * @return エンティティ
+     */
+    public MPrinter findById(String printerId) {
+        return select().id(printerId).getSingleResult();
+    }
+
+    /**
+     * 識別子の昇順ですべてのエンティティを検索します。
+     * 
+     * @return エンティティのリスト
+     */
+    public List<MPrinter> findAllOrderById() {
+        return select().orderBy(asc(printerId())).getResultList();
+    }
+}

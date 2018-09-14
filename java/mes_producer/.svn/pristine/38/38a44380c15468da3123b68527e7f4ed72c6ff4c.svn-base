@@ -1,0 +1,63 @@
+package jp.co.tmeic.mespd.service;
+
+import static jp.co.tmeic.mespd.entity.DLabelPrintQueueNames.*;
+import static org.seasar.extension.jdbc.operation.Operations.*;
+
+import java.util.List;
+
+import javax.annotation.Generated;
+
+import jp.co.tmeic.mespd.entity.DLabelPrintQueue;
+
+/**
+ * {@link DLabelPrintQueue}のサービスクラスです。
+ *
+ */
+@Generated(value = { "S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl" })
+public class DLabelPrintQueueService extends AbstractService<DLabelPrintQueue> {
+
+	/**
+	 * 識別子でエンティティを検索します。
+	 *
+	 * @param printerId
+	 *            識別子
+	 * @param sequenceNo
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public DLabelPrintQueue findById(String printerId, Integer sequenceNo) {
+		return select().id(printerId, sequenceNo).getSingleResult();
+	}
+
+	/**
+	 * 識別子の昇順ですべてのエンティティを検索します。
+	 *
+	 * @return エンティティのリスト
+	 */
+	public List<DLabelPrintQueue> findAllOrderById() {
+		return select().orderBy(asc(printerId()), asc(sequenceNo())).getResultList();
+	}
+
+	/**
+	 * 印刷キューを追加します。
+	 *
+	 * @param dLabelPrintQueue
+	 * @return
+	 */
+	public void enqueue(DLabelPrintQueue dLabelPrintQueue) {
+
+		dLabelPrintQueue.sequenceNo = nextSequenceNo(dLabelPrintQueue.printerId);
+
+		insert(dLabelPrintQueue);
+	}
+
+	/**
+	 * プリンタIDの次の印刷順を取得します。
+	 *
+	 * @param printerId
+	 * @return
+	 */
+	private int nextSequenceNo(String printerId) {
+		return max("SELECT MAX(sequence_no) FROM d_label_print_queue WHERE printer_id=?", printerId) + 1;
+	}
+}

@@ -1,0 +1,36 @@
+package jp.co.tmeic.mespd.service;
+
+import static jp.co.tmeic.mespd.entity.DBarcodeLabelManagementNames.barcodeNo;
+import static org.seasar.extension.jdbc.operation.Operations.asc;
+
+import java.util.List;
+
+import javax.annotation.Generated;
+
+import jp.co.tmeic.mespd.dto.jqgrid.product.VDBarcodeAssociationDbDto;
+import jp.co.tmeic.mespd.entity.DBarcodeLabelManagement;
+
+@Generated(value = { "S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl" })
+public class DBarcodeLabelManagementService extends AbstractService<DBarcodeLabelManagement>{
+	
+	public DBarcodeLabelManagement findById(String barcodeNo) {
+		return select().id(barcodeNo).getSingleResult();
+	}
+	public DBarcodeLabelManagement findByProductPlanNoAndSerialNo(String productPlanNo,String serialNo) {
+		return jdbcManager
+				.selectBySql(
+						DBarcodeLabelManagement.class,
+						"SELECT * FROM d_barcode_label_management WHERE product_plan_no=? AND serial_no=?",
+						productPlanNo, serialNo)
+				.getSingleResult();
+	}
+	public List<DBarcodeLabelManagement> findAllOrderById() {
+		return select().orderBy(asc(barcodeNo())).getResultList();
+	}
+	public int deleteById(String productPlanNo,String serialNo) {
+		return jdbcManager
+				.updateBySql("DELETE FROM d_barcode_label_management WHERE product_plan_no=? and serial_no=?", String.class, String.class)
+				.params(productPlanNo, serialNo)
+				.execute();
+	}
+}

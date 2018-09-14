@@ -1,0 +1,423 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
+
+<bean:define id="barcode">
+  <bean:message key="product.barcode"/>
+</bean:define>
+
+<style type="text/css">
+  h3.inputinfo{
+    color:#38b;
+    font-size:x-large;
+    font-weight:bold;
+    padding:3px 5px;
+    margin-top:0px;
+    border-bottom:1px solid #38b;
+  }
+</style>
+
+<script type="text/javascript">
+
+  var insertPocessGridRowId = "";
+  var targetProductPlans = null;
+
+  function initializeProductResultInsertDialog(processInfo, productsMaterialSize, productsSpecSize, productPlans) {
+
+    // BackUp of current product plans
+    targetProductPlans = productPlans;
+
+    $(insertPocessGrid.gridId).clearGridData();
+    $(insertPocessGrid.gridId).setGridParam({datatype: "local", data: JqGridUtils.setDetailGrid(JSON.stringify(processInfo))});
+    $(insertPocessGrid.gridId).trigger("reloadGrid");
+    $("#processComponentNo").val(processInfo[0].processComponentNo );
+    
+    setProcessProductGridColumnState(insertPocessProductGrid.gridId, productsMaterialSize, productsSpecSize, targetProductPlans);
+    if(processInfo[0].processComponentNo != 1){
+    	 $(insertPocessProductGrid.gridId).showCol("status");
+    	 $("#enter").hide();
+    	 $("#start").show();
+    	 $("#finish").show();
+    }else{
+    	 $(insertPocessProductGrid.gridId).hideCol("status");
+    	 $("#enter").show();
+    	 $("#start").hide();
+    	 $("#finish").hide();
+    }
+    
+    $(insertPocessProductGrid.gridId).clearGridData();
+    $(insertPocessProductGrid.gridId).trigger("reloadGrid");
+
+    // get insertPocessGrid's first row id.
+    var ids = $(insertPocessGrid.gridId).jqGrid("getDataIDs");
+    if(ids.length > 0) {
+      insertPocessGridRowId = ids[0];
+    }
+
+    var dialogProp = dialogUtils.defaultProp();
+
+    dialogProp.title = "<bean:message key='process.product.result.input'/>";
+    dialogProp.minWidth = 850;
+    dialogProp.minHeight = 700;
+    dialogProp.buttons = [];
+    $("#insertResultDialog").dialog(dialogProp);
+    $("#inputBarcode").focus();
+  }
+
+  function createInsertProcessGrid() {
+
+    insertPocessGrid.prop;
+
+    insertPocessGrid.prop.colNames =
+      [
+        'ID',
+        'CRUD',
+        '<bean:message key="product.manifacturedate"/>',
+        '<bean:message key="plan.no"/>',
+        '<bean:message key="part.no"/>',
+        '<bean:message key="part.name"/>',
+        '<bean:message key="product.customer.name"/>',
+        '<bean:message key="product.model"/>',
+        'processComponentNo',
+        '<bean:message key="process.name"/>',
+      ];
+
+    insertPocessGrid.prop.colModel =
+      [
+        { name : 'id', key : true,      hidden : true },
+        { name : 'crud',                hidden : true },
+        { name : 'manufactureDate',     width : '110', align : 'center', frozen : true, sortable : false, sorttype : 'text', editable : false},
+        { name : 'productPlanNo',       width : '110', align : 'center', frozen : true, sortable : false, sorttype : 'text', editable : false},
+        { name : 'partNo',              width : '110', align : 'center', frozen : true, sortable : false, sorttype : 'text', editable : false},
+        { name : 'partName',            width : '110', align : 'center', frozen : true, sortable : false, sorttype : 'text', editable : false},
+        { name : 'customerName',        width : '110', align : 'center', frozen : true, sortable : false, sorttype : 'text', editable : false},
+        { name : 'model',               width : '110', align : 'center', frozen : true, sortable : false, sorttype : 'text', editable : false},
+        { name : 'processComponentNo',  hidden : true },
+        { name : 'processName',         width : '130', align : 'center', frozen : true, sortable : false, sorttype : 'text', editable : false},
+      ];
+
+    insertPocessGrid.prop.data =
+      [
+        {'manufactureDate' : '2015/05/11', 'productPlanNo' : '1505110001', 'productName' : 'product1', 'processComponentNo' : '1', 'processName' : 'process1'},
+      ];
+
+    insertPocessGrid.prop.data = [];
+
+    insertPocessGrid.prop.width = 820;
+    insertPocessGrid.prop.height = 26;
+
+    insertPocessGrid.prop.rownumbers = false;
+
+    insertPocessGrid.edit(${f:url('/')});
+
+    $(insertPocessGrid.gridId).jqGrid(insertPocessGrid.prop);
+  }
+
+  function createInsertProcessProductGrid(){
+
+    insertPocessProductGrid.prop;
+
+    insertPocessProductGrid.prop.colNames =
+      [
+        'ID',
+        'CRUD',
+        '<bean:message key="product.scan.barcode"/>',
+        '<bean:message key="product.serialno"/>',
+        'revision',
+        '<bean:message key="result.status"/>',
+        <c:forEach var="i" begin="1" end="${processMaterialPlanMax}" step="1">
+        'materialComponentNo',
+        '<bean:message key="name"/>',
+        '<bean:message key="quantity"/>',
+        '<bean:message key="material.unit"/>',
+        </c:forEach>
+        <c:forEach var="i" begin="1" end="${processProductSpecPlanMax}" step="1">
+        'specComponentNo',
+        'specId',
+        'specAttributeId',
+        '<bean:message key="spec.name"/>',
+        '<bean:message key="input.value"/>',
+        </c:forEach>
+
+      ];
+
+    insertPocessProductGrid.prop.colModel =
+      [
+        { name : 'id',     key : true,      hidden : true },
+        { name : 'crud',                    hidden : true },
+        { name : 'barcode',                 width : '120', align : 'left',   frozen : false,  sortable : false, sorttype : 'text', editable : false},
+        { name : 'serialNo',                hidden : true, width : '120', align : 'left',   frozen : false,  sortable : false, sorttype : 'text', editable : false},
+        { name : 'revision',                hidden : true, frozen : false },
+        { name : 'status',                  hidden : true, width : '100', align : 'center', frozen : false, sortable : false, sorttype : 'text', editable : false, edittype : 'select', formatter:'select', editoptions:{value : '${f:h(processProductStatus)}'}, cellattr: processProductStatusStyleFmatter },
+        <c:forEach var="i" begin="1" end="${processMaterialPlanMax}" step="1">
+        { name : 'materialComponentNo${i}', hidden : true },
+        { name : 'materialName${i}',        hidden : true, width : '120', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false},
+        { name : 'materialQty${i}',         hidden : true, width :  '90', align : 'right',  frozen : false, sortable : false, sorttype : 'text', editable : true,  edittype : 'text',   editrules:{required : false},  editoptions: {maxlength: ${materialQuantityMaxLength}}},
+        { name : 'materialUnit${i}',        hidden : true, width :  '40', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false},
+        </c:forEach>
+        <c:forEach var="i" begin="1" end="${processProductSpecPlanMax}" step="1">
+        { name : 'specComponentNo${i}',     hidden : true },
+        { name : 'specId${i}',              hidden : true },
+        { name : 'specAttributeId${i}',     hidden : true },
+        { name : 'specName${i}',            hidden : true, width : '120', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false},
+        { name : 'inputValue${i}',          hidden : true, width : '120', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : true,  edittype : 'text',   editrules:{required : false}, editoptions: {maxlength: ${specInputvalueMaxLength}, separator : ':::', delimiter : '|||'}},
+        </c:forEach>
+      ];
+
+    insertPocessProductGrid.groupHeader = (function() {
+      $(insertPocessProductGrid.gridId).jqGrid('setGroupHeaders', {
+        useColSpanStyle : true,
+        groupHeaders : [
+                        <c:forEach var="i" begin="1" end="${processMaterialPlanMax}" step="1">
+                        {startColumnName: 'materialComponentNo${i}',   numberOfColumns: 4, titleText: '<bean:message key="material"/>${i}'},
+                        </c:forEach>
+                        <c:forEach var="i" begin="1" end="${processProductSpecPlanMax}" step="1">
+                        {startColumnName: 'specComponentNo${i}',   numberOfColumns: 5, titleText: '<bean:message key="spec"/>${i}'},
+                        </c:forEach>
+                       ]
+      });
+    });
+
+    insertPocessProductGrid.prop.data =
+      [
+        {'serialNo' : 'SerailNo0001'},
+      ];
+
+    insertPocessProductGrid.prop.data = [];
+
+    insertPocessProductGrid.prop.width = 820;
+    insertPocessProductGrid.prop.height = 372;
+
+    insertPocessProductGrid.edit(${f:url('/')});
+    insertPocessProductGrid.fitWidth = false;
+
+    $(insertPocessProductGrid.gridId).jqGrid(insertPocessProductGrid.prop);
+  }
+
+  // Add New Row
+  function addProductResultRow() {
+
+    var barcode = $("#inputBarcode").val();
+    var processComponentNo = $("#processComponentNo").val();
+   
+	var isDuplicate = isDuplicateBarcode(barcode);
+	if (isDuplicate) {
+	  $("#inputBarcode").focus();
+	  $("#inputBarcode").select();
+	  dialogUtils.alert("<bean:message key='errors.duplicate' arg0='<%= barcode %>'/>");
+	  return ;
+	}
+    
+    	
+    var newRowData = createProductNewRowData(barcode);
+    if (!newRowData) {
+      return ;
+    }
+
+    var newRowDataWithPlan = combineResultAndPlan($.parseJSON(newRowData), targetProductPlans);
+    insertPocessProductGrid.addRow(newRowDataWithPlan);
+    $("#inputBarcode").val("");
+    $("#inputBarcode").focus();
+     
+  }
+
+  //check for duplicate input barcode
+  function isDuplicateBarcode(barcode){
+
+    if(!barcode) {
+      return false;
+    }
+
+    var isDuplicate = false;
+    var data = $(insertPocessProductGrid.gridId).jqGrid('getGridParam', 'data');
+
+    $.each(data, function(i, element){
+      if(element.barcode == barcode){
+        isDuplicate = true;
+        return false;
+      }
+    });
+
+    return isDuplicate;
+  }
+
+  // Get the data of the new line asynchronously from server
+  function createProductNewRowData(inputBarcode){
+
+    var newRowData = "";
+    var processComponentNo = $(insertPocessGrid.gridId).getCell(insertPocessGridRowId, "processComponentNo");
+
+    ajaxPostJson({
+      data: {
+        productPlanNo: "${productPlanNo}",
+        processComponentNo: processComponentNo,
+        barcode : inputBarcode,
+      },
+      url: "${f:url('/product/productResultInput/createProductNewRowData/')}",
+      success:function(data) {
+        if (data.result == "OK") {
+          newRowData = data.newRowData;
+        } else if (data.result == "NG") {
+          dialogUtils.alert(data.message);
+        }
+      }
+    });
+
+    return newRowData;
+  }
+
+  function deleteProductResultRow() {
+
+    var rowId = insertPocessProductGrid.selrow();
+
+    if (rowId == null) {
+      dialogUtils.alert("<bean:message key='errors.not.select'/>");
+      return false;
+    }
+
+    $(insertPocessProductGrid.gridId).delGridRow(rowId);
+  }
+
+  function productsEnter() {
+
+	    var validationUrl =  "${f:url('/product/productResultInput/productsValidationAtStart/')}";
+	    var updateUrl = "${f:url('/product/productResultInput/productsEnter/')}";
+
+	    if (!insertPocessProductGrid.prop.saveEditRow(insertPocessProductGrid.lastSelRowId)) return;
+
+	    var updateData = insertPocessProductGrid.getUpdateData();
+
+	    if (updateData.length == 0) {
+	      dialogUtils.alert("<bean:message key='errors.no.register.data'/>");
+	    } else {
+	      callServerValidation(validationUrl, updateUrl, productsUpdate);
+	    }
+	  }
+  
+  function productsStart() {
+
+    var validationUrl =  "${f:url('/product/productResultInput/productsValidationAtStart/')}";
+    var updateUrl = "${f:url('/product/productResultInput/productsStart/')}";
+
+    if (!insertPocessProductGrid.prop.saveEditRow(insertPocessProductGrid.lastSelRowId)) return;
+
+    var updateData = insertPocessProductGrid.getUpdateData();
+
+    if (updateData.length == 0) {
+      dialogUtils.alert("<bean:message key='errors.no.register.data'/>");
+    } else {
+      callServerValidation(validationUrl, updateUrl, productsUpdate);
+    }
+  }
+
+  function productsEnd() {
+
+    var validationUrl =  "${f:url('/product/productResultInput/productsValidationAtEnd/')}";
+    var updateUrl = "${f:url('/product/productResultInput/productsEnd/')}";
+
+    if (!insertPocessProductGrid.prop.saveEditRow(insertPocessProductGrid.lastSelRowId)) return;
+
+    var updateData = insertPocessProductGrid.getUpdateData();
+
+    if (updateData.length == 0) {
+      dialogUtils.alert("<bean:message key='errors.no.register.data'/>");
+    } else {
+      callServerValidation(validationUrl, updateUrl, productsUpdate);
+    }
+  }
+
+  var  productsUpdate = function(processComponentNo, updateData, updateUrl) {
+
+    // For selecting a row of the processgrid after the update, and back up the selected row in the processgrid.
+    $("#selectRowOfProcessGrid").val(processGrid.selrow());
+
+    $("#processComponentNo").val(processComponentNo);
+    $("#processProductResultJson").val(JSON.stringify(updateData));
+
+    $("#mainForm").attr("action", updateUrl);
+    $("#mainForm").submit();
+  }
+
+  // validation before update
+  function callServerValidation(validationUrl, updateUrl, updateFunction) {
+
+    var productPlanNo = "${productPlanNo}";
+    var processComponentNo = $(insertPocessGrid.gridId).getCell(insertPocessGridRowId, "processComponentNo");
+    var updateData = insertPocessProductGrid.getUpdateData();
+
+    ajaxPostJson({
+      url: validationUrl,
+      data: {
+        productPlanNo : productPlanNo,
+        processComponentNo : processComponentNo,
+        updateData : JSON.stringify(updateData),
+      },
+      success:function(data) {
+
+        switch(data.result) {
+
+          case "OK":
+            dialogUtils.confirm(
+              "<bean:message key='info.register'/>",
+              function() {
+                updateFunction(processComponentNo, updateData, updateUrl);
+              }
+            );
+            break;
+
+          case "WARN":
+            dialogUtils.confirm(
+              data.message,
+              function() {
+                updateFunction(processComponentNo, updateData, updateUrl);
+              }
+            );
+            break;
+
+          default:
+            dialogUtils.alert(data.message);
+            break;
+        }
+      }
+    });
+  }
+
+  function closeProductsDialog() {
+    $("#insertResultDialog").dialog("close");
+  }
+
+</script>
+
+
+<div id = "insertResultDialog"  style="display: none; background-color:#BDD7EE;">
+
+  <h3 class="inputinfo">
+    <bean:message key="info.inputrequest.itemlabel"/>
+  </h3>
+
+  <div>
+    <table class="scroll" id="insertProcessList"></table>
+  </div>
+
+  <div style="margin-top:15px;">
+	  
+	<span style="display:block;font-weight:bold;">
+		<bean:message key="product.barcode"/>
+	</span>
+	<input type="text" id="inputBarcode" maxlength="${barcodeMaxLength}" value="" style=" width: 200px;" />
+	<input type="button" value="<bean:message key="add"/>" onclick="addProductResultRow()" style="width: 110px;"/>
+    <input type="button" value="<bean:message key="delete"/>" onclick="deleteProductResultRow()" style="width: 110px;"/>
+
+    
+  </div>
+
+  <div style="margin-top:5px;">
+    <table class="scroll" id="insertProcessProductList"></table>
+  </div>
+
+  <div style="margin-top:15px;">
+    <input type="button" id="enter" value="<bean:message key="enter"/>" onclick="productsEnter()" style="width: 110px;"/>
+    <input type="button" id="start" value="<bean:message key="start"/>" onclick="productsStart()" style="width: 110px;"/>
+    <input type="button" id="finish" value="<bean:message key="finish"/>" onclick="productsEnd()" style="width: 110px; margin-left:20px;"/>
+    <input type="button" value="<bean:message key="cancel"/>" onclick="closeProductsDialog()" style="width: 110px; margin-left:380px;"/>
+  </div>
+
+</div>

@@ -1,0 +1,1310 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+MESPdHandy
+</name>
+</assembly>
+<members>
+<member name="F:MESPdHandy.frmBase.NextForm">
+	<summary>NextForm</summary>
+</member><member name="F:MESPdHandy.frmBase.AppData">
+	<summary>AppData</summary>
+</member><member name="F:MESPdHandy.frmBase.scan">
+	<summary>Scan Interface</summary>
+</member><member name="M:MESPdHandy.frmBase.frmBase_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.btnClose_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.btnF1_Click(System.Object,System.EventArgs)">
+	<summary>
+ F1 button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.btnF2_Click(System.Object,System.EventArgs)">
+	<summary>
+ F2 button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.btnF3_Click(System.Object,System.EventArgs)">
+	<summary>
+ F3 button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.btnF4_Click(System.Object,System.EventArgs)">
+	<summary>
+ F4 button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.btnF5_Click(System.Object,System.EventArgs)">
+	<summary>
+ Logout button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.frmBase_KeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
+	<summary>
+ Key down event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.frmBase_KeyUp(System.Object,System.Windows.Forms.KeyEventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmBase.MoveNextForm(MESPdHandy.frmBase)">
+	<summary>
+ Close the form in the display to display the following form
+ </summary>
+	<param name="nextFrom"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmBase">
+	<summary>
+ Base form
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.frmMaterialRead_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.frmMaterialRead_Closing(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.btnF1_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.btnF2_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.btnF3_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.btnEnter_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.ReadMaterialEnter">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.txt_GotFocus(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialRead.GetScanCode(System.String)">
+	<summary>
+	</summary>
+	<param name="data"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmMaterialRead">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterial.frmMaterial_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmMaterial">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.ProcessSelection.ProcessId">
+	<summary>ProductPlanNo</summary>
+</member><member name="F:MESPdHandy.ProcessSelection.ProcessName">
+	<summary>ProcessName</summary>
+</member><member name="F:MESPdHandy.ProcessSelection.HandyManaged">
+	<summary>ResultQty</summary>
+</member><member name="T:MESPdHandy.ProcessSelection">
+	<summary>
+ Process information
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.UserService.IsPasswordRequired">
+	<summary>
+ Get Password Required Setting
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.UserService.IsAuth(System.String,System.String)">
+	<summary>
+	</summary>
+	<param name="userCode"></param>
+	<param name="password"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.UserService.GetUserInfo(System.String,System.String)">
+	<summary>
+	</summary>
+	<param name="userCode"></param>
+	<param name="password"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.Service.UserService">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.SpecInfo.SpecComponentNo">
+	<summary>SpecComponentNo</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecId">
+	<summary>SpecId</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecName">
+	<summary>SpecName</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecAttributeId">
+	<summary>SpecAttributeId</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecAttributeName">
+	<summary>SpecAttributeName</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts01">
+	<summary>SpecParts01</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts02">
+	<summary>SpecParts02</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts03">
+	<summary>SpecParts03</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts04">
+	<summary>SpecParts04</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts05">
+	<summary>SpecParts05</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts06">
+	<summary>SpecParts06</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts07">
+	<summary>SpecParts07</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts08">
+	<summary>SpecParts08</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts09">
+	<summary>SpecParts09</summary>
+</member><member name="F:MESPdHandy.SpecInfo.SpecParts10">
+	<summary>SpecParts10</summary>
+</member><member name="F:MESPdHandy.SpecInfo.InputValue">
+	<summary>InputValue</summary>
+</member><member name="M:MESPdHandy.SpecInfo.GetSpecParts">
+	<summary>All SpecParts</summary>
+</member><member name="T:MESPdHandy.SpecInfo">
+	<summary>
+ Spec information
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.DisplayOrderUtils.SelectOrder``1(System.Collections.Generic.List{``0},System.Int32)">
+	<summary>
+	</summary>
+	<typeparam name="t"></typeparam>
+	<param name="value"></param>
+	<param name="order"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.DisplayOrderUtils.FirstOrder``1(System.Collections.Generic.List{``0})">
+	<summary>
+	</summary>
+	<typeparam name="t"></typeparam>
+	<param name="value"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.DisplayOrderUtils.LastOrder``1(System.Collections.Generic.List{``0})">
+	<summary>
+	</summary>
+	<typeparam name="t"></typeparam>
+	<param name="value"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.DisplayOrderUtils.NextOrder``1(System.Collections.Generic.List{``0},System.Int32)">
+	<summary>
+	</summary>
+	<typeparam name="t"></typeparam>
+	<param name="value"></param>
+	<param name="nowOrder"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.DisplayOrderUtils.PrevOrder``1(System.Collections.Generic.List{``0},System.Int32)">
+	<summary>
+	</summary>
+	<typeparam name="t"></typeparam>
+	<param name="value"></param>
+	<param name="nowOrder"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.DisplayOrderUtils">
+	<summary>
+ DisplayOrder Utility
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmProcessRead.frmProcessRead_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmProcessRead.frmProcessRead_Closing(System.Object,System.EventArgs)">
+	<summary>
+ Form Closing event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmProcessRead.btnEnter_Click(System.Object,System.EventArgs)">
+	<summary>
+ Process code defined click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmProcessRead.txt_GotFocus(System.Object,System.EventArgs)">
+	<summary>
+ Text input gotfocus event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmProcessRead.GetScanCode(System.String)">
+	<summary>
+ Get the scan data
+ </summary>
+	<param name="data"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmProcessRead.ReadProcessEnter">
+	<summary>
+ It will move to the result input process
+ </summary>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmProcessRead">
+	<summary>
+ Process Read Form
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.frmResultInputProduct_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.frmResultInputProduct_Closing(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.btnF1_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.btnF2_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.btnF3_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.txtSerialNumber_KeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.GetSerialNoInfo(System.String,System.Int32,System.String)">
+	<summary>
+ Get SerialNo info
+ </summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.btnStart_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.CreateSerialNo(System.String,System.Int32,System.String)">
+	<summary>
+ Create SerialNo
+ </summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.WorkStart(MESPdHandy.ProcessInfo,MESPdHandy.SerialNoInfo)">
+	<summary>
+ Start working on the product
+ </summary>
+	<param name="process"></param>
+	<param name="serial"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.btnFinish_Click(System.Object,System.EventArgs)">
+	<summary>
+ Finish the work of the product
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.WorkFinish(MESPdHandy.ProcessInfo,MESPdHandy.SerialNoInfo,MESPdHandy.UserInfo)">
+	<summary>
+	</summary>
+	<param name="process"></param>
+	<param name="serialNoInfo"></param>
+	<param name="user"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.txt_GotFocus(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.GetScanCode(System.String)">
+	<summary>
+	</summary>
+	<param name="data"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.RefreshProductInfo">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.MoveMaterialRead">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInputProduct.MoveSpecProduct">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.SerialNoInfo.SerialNo">
+	<summary>SerialNo</summary>
+</member><member name="F:MESPdHandy.SerialNoInfo.Status">
+	<summary>Work Status</summary>
+</member><member name="F:MESPdHandy.SerialNoInfo.Materials">
+	<summary>Material</summary>
+</member><member name="F:MESPdHandy.SerialNoInfo.SpecProducts">
+	<summary>SpecProduct</summary>
+</member><member name="T:MESPdHandy.SerialNoInfo">
+	<summary>
+ SerialNo information
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.CfUtils.ActiveControl(System.Windows.Forms.Form)">
+	<summary>
+	</summary>
+	<param name="form"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.CfUtils.GetFocusedControl(System.Windows.Forms.Control@)">
+	<summary>
+	</summary>
+	<param name="parent"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.CfUtils.GetCurrentDirectory">
+	<summary>
+ Get current directory
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.CfUtils.TextEscape(System.String)">
+	<summary>
+ Escape of text properties
+ </summary>
+	<param name="text"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.CfUtils">
+	<summary>
+ Compact framework extension utility
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.HttpUtils.GetRequest(System.String)">
+	<summary>
+	</summary>
+	<param name="url"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.HttpUtils.GetRequest(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+	<summary>
+	</summary>
+	<param name="url"></param>
+	<param name="params"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.HttpUtils">
+	<summary>
+ HTTP Utility
+ </summary>
+	<remarks></remarks>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ResourceManager">
+	<summary>
+  このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.Culture">
+	<summary>
+  厳密に型指定されたこのリソース クラスを使用して、すべての検索リソースに対し、
+  現在のスレッドの CurrentUICulture プロパティをオーバーライドします。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorCanNotFinish">
+	<summary>
+  It could not be finished に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorCanNotProcessStart">
+	<summary>
+  It could not be started に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorCanNotStart">
+	<summary>
+  It could not be started に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorFinished">
+	<summary>
+  It has been finished に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorLogin">
+	<summary>
+  Login error に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorMaterialIncorrect">
+	<summary>
+  Material is incorrect に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorNoResultsPreviousProcess">
+	<summary>
+  No results of previous process. Do you want to continue? に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorNotInputPassword">
+	<summary>
+  Password is required に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorNotInputUserId">
+	<summary>
+  User ID is required に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorNotStart">
+	<summary>
+  It does not start に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorProcessStarted">
+	<summary>
+  It has been started に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorRegister">
+	<summary>
+  Registration error に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorSerialNoCreation">
+	<summary>
+  Serial No creation error に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorSerialRequired">
+	<summary>
+  Please input the serial No に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ErrorStarted">
+	<summary>
+  It has been started に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.LogOutConfirm">
+	<summary>
+  Do you want to log out? に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.NoneData">
+	<summary>
+  None data に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ProcessProductStatusComplete">
+	<summary>
+  Finish に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ProcessProductStatusNone">
+	<summary>
+  ― に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ProcessProductStatusStart">
+	<summary>
+  Working に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ProcessStatusComplete">
+	<summary>
+  Finish に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ProcessStatusNone">
+	<summary>
+  ― に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="P:MESPdHandy.My.Resources.Resources.ProcessStatusStart">
+	<summary>
+  Start に類似しているローカライズされた文字列を検索します。
+</summary>
+</member><member name="T:MESPdHandy.My.Resources.Resources">
+	<summary>
+  ローカライズされた文字列などを検索するための、厳密に型指定されたリソース クラスです。
+</summary>
+</member><member name="M:MESPdHandy.ProcessProductStatus.NameList">
+	<summary>
+ Status name list
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.ProcessProductStatus.GetName(System.Int32)">
+	<summary>
+ Get Status name
+ </summary>
+	<param name="status"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.ProcessProductStatus">
+	<summary>
+ Process product status
+ </summary>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.SpecAttributeId">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProcessService.GetProcessInfo(System.String,System.Int32)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProcessService.GetProcessInfoByBarcode(System.String,System.String)">
+	<summary>
+	</summary>
+	<param name="barcode"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProcessService.GetSpecInfo(System.String,System.Int32)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProcessService.ProcessWorkStart(System.String,System.Int32)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProcessService.ProcessWorkFinish(System.String,System.Int32)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProcessService.SpecRegister(System.String,System.Int32,System.Collections.Generic.List{MESPdHandy.SpecInfo})">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="spec"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.Service.ProcessService">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.ProcessInfo.ProductPlanNo">
+	<summary>ProductPlanNo</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.ProductName">
+	<summary>ProductName</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.ProcessComponentNo">
+	<summary>ProcessComponentNo</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.ProcessName">
+	<summary>ProcessName</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.Status">
+	<summary>ProcessStatus</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.PlanQty">
+	<summary>PlanQty</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.ResultQty">
+	<summary>ResultQty</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.SerialNo">
+	<summary>SerialNo</summary>
+</member><member name="F:MESPdHandy.ProcessInfo.barcode">
+	<summary>Barcode</summary>
+</member><member name="T:MESPdHandy.ProcessInfo">
+	<summary>
+ Process information
+ </summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.ProductInfo.SerialNo">
+	<summary>SerialNo</summary>
+</member><member name="F:MESPdHandy.ProductInfo.Revision">
+	<summary>Revision</summary>
+</member><member name="F:MESPdHandy.ProductInfo.Status">
+	<summary>ProductStatus</summary>
+</member><member name="T:MESPdHandy.ProductInfo">
+	<summary>
+ Product information
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.MsgBoxUtils.Warning(System.String)">
+	<summary>
+ Warning message box show 
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.MsgBoxUtils.Err(System.String)">
+	<summary>
+ Error message box show 
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.MsgBoxUtils.YesNo(System.String)">
+	<summary>
+ YesNo message box show 
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.MsgBoxUtils">
+	<summary>
+ MsgBox Utility
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.BooleanUtils.Parse(System.String)">
+	<summary>
+	</summary>
+	<param name="value"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.BooleanUtils">
+	<summary>
+ Boolean utility
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.frmInputWork_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.frmInputWork_Closing(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.btnF2_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.btnF3_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.txtSerialNumber_KeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.GetSerialNoInfo(System.String,System.Int32,System.String)">
+	<summary>
+ Get SerialNo info
+ </summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.btnStart_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.CreateSerialNo(System.String,System.Int32,System.String)">
+	<summary>
+ Create SerialNo
+ </summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.WorkStart(MESPdHandy.ProcessInfo,MESPdHandy.SerialNoInfo)">
+	<summary>
+ Start working on the product
+ </summary>
+	<param name="process"></param>
+	<param name="serial"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.WorkFinish(MESPdHandy.ProcessInfo,MESPdHandy.SerialNoInfo,MESPdHandy.UserInfo)">
+	<summary>
+	</summary>
+	<param name="process"></param>
+	<param name="serialNoInfo"></param>
+	<param name="user"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.txt_GotFocus(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.GetScanCode(System.String)">
+	<summary>
+	</summary>
+	<param name="data"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.RefreshProductInfo">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.MoveMaterialRead">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInputWork.MoveSpecProduct">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInput.frmResultInput_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInput.btnF1_Click(System.Object,System.EventArgs)">
+	<summary>
+ F1 button click event
+ Move to Process Read Form
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInput.btnStart_Click(System.Object,System.EventArgs)">
+	<summary>
+ Start button click event
+ To start the process
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInput.btnFinish_Click(System.Object,System.EventArgs)">
+	<summary>
+ Finish button click event
+ finish the process
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInput.btnProduct_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInput.RefreshProcessInfo">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmResultInput.MoveSpecProduct">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmResultInput">
+	<summary>
+ Result Input Form
+ </summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.AppData.RootUrl">
+	<summary>Root</summary>
+</member><member name="F:MESPdHandy.AppData.User">
+	<summary>User</summary>
+</member><member name="F:MESPdHandy.AppData.Process">
+	<summary>Process</summary>
+</member><member name="F:MESPdHandy.AppData.SerialNoInfo">
+	<summary>SerialNo Info</summary>
+</member><member name="F:MESPdHandy.AppData.SpecProcesses">
+	<summary>Spec Process</summary>
+</member><member name="F:MESPdHandy.AppData.NowSpecType">
+	<summary>NowSpecType</summary>
+</member><member name="F:MESPdHandy.AppData.NowDisplayOrder">
+	<summary>NowDisplayOrder</summary>
+</member><member name="M:MESPdHandy.AppData.IsMaterialInputCompletion">
+	<summary>
+ Check the already input all material
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.AppData.IsSpecProcessInputCompletion">
+	<summary>
+ Check the already input all spec process
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.AppData.IsSpecProductInputCompletion">
+	<summary>
+ Check the already input all spec product
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.AppData.SpecInfo">
+	<summary>
+ Get SpecInfo
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.WorkInfo.ProductName">
+	<summary>ProductName</summary>
+</member><member name="F:MESPdHandy.WorkInfo.ProductPlanNo">
+	<summary>ProductPlanNo</summary>
+</member><member name="F:MESPdHandy.WorkInfo.ProcessName">
+	<summary>ProcessName</summary>
+</member><member name="F:MESPdHandy.WorkInfo.Barcode">
+	<summary>Barcode</summary>
+</member><member name="F:MESPdHandy.WorkInfo.Status">
+	<summary>ProductStatus</summary>
+</member><member name="F:MESPdHandy.WorkInfo.SpecProducts">
+	<summary>SpecProduct</summary>
+</member><member name="T:MESPdHandy.WorkInfo">
+	<summary>
+ Product information
+ </summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.DisplayOrder.DisplayOrder">
+	<summary>DisplayOrder</summary>
+</member><member name="M:MESPdHandy.frmLogin.frmLogin_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmLogin.frmLogin_Closing(System.Object,System.EventArgs)">
+	<summary>
+ Form Closing event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmLogin.btnF4_Click(System.Object,System.EventArgs)">
+	<summary>
+ Login button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmLogin.txt_GotFocus(System.Object,System.EventArgs)">
+	<summary>
+ Text input gotfocus event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmLogin.GetScanCode(System.String)">
+	<summary>
+ Get the scan data
+ </summary>
+	<param name="data"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmLogin">
+	<summary>
+ Login Form
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecSelect.frmSpecSelect_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecSelect.cmbInputValue_SelectedIndexChanged(System.Object,System.EventArgs)">
+	<summary>
+ InputValue of Selected Index Changed event
+ record the input value
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecSelect.InitCmbInput(System.Windows.Forms.ComboBox,MESPdHandy.SpecInfo)">
+	<summary>
+ Initialize ComboBox
+ </summary>
+	<param name="cmb"></param>
+	<param name="spec"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSerial.frmSerial_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSerial.RefreshProcessInfo">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmSerial">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.ProcessStatus.NameList">
+	<summary>
+ Status name list
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.ProcessStatus.GetName(System.Int32)">
+	<summary>
+ Get Status name
+ </summary>
+	<param name="status"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.ProcessStatus">
+	<summary>
+ Process status
+ </summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.UserInfo.UserId">
+	<summary>UserId</summary>
+</member><member name="F:MESPdHandy.UserInfo.UserName">
+	<summary>UserName</summary>
+</member><member name="T:MESPdHandy.UserInfo">
+	<summary>
+ User information
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecInput.frmSpecInput_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecInput.frmSpecInput_Closing(System.Object,System.EventArgs)">
+	<summary>
+ Form Closing event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecInput.txtInputValue_TextChanged(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecInput.txt_GotFocus(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecInput.GetScanCode(System.String)">
+	<summary>
+ Get the scan data
+ </summary>
+	<param name="data"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInit.frmInit_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInit.frmClosing(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInit.frmClosed(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInit.SetNextForm(MESPdHandy.frmBase)">
+	<summary>
+	</summary>
+	<param name="form"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmInit.GetWebUrl">
+	<summary>
+	</summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialInput.frmMaterialInput_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialInput.btnF1_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialInput.btnF4_Click(System.Object,System.EventArgs)">
+	<summary>
+ F4 button click event
+ Register the material, move to the next form
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialInput.txt_GotFocus(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmMaterialInput.txtResultQty_TextChanged(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmMaterialInput">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.NumberUtils.Parse(System.String)">
+	<summary>
+ A string representation of a number, same to convert to an equivalent 32-bit signed integer.
+ </summary>
+	<param name="val"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.NumberUtils.IsNumber(System.String)">
+	<summary>
+ A string representation of a number, same to convert to an equivalent 32-bit signed integer.
+ </summary>
+	<param name="val"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.NumberUtils">
+	<summary>
+ Number Utility
+ </summary>
+	<remarks></remarks>
+</member><member name="F:MESPdHandy.MaterialInfo.MaterialComponentNo">
+	<summary>MaterialComponentNo</summary>
+</member><member name="F:MESPdHandy.MaterialInfo.MaterialId">
+	<summary>MaterialId</summary>
+</member><member name="F:MESPdHandy.MaterialInfo.MaterialName">
+	<summary>MaterialName</summary>
+</member><member name="F:MESPdHandy.MaterialInfo.MaterialUnit">
+	<summary>MaterialUnit</summary>
+</member><member name="F:MESPdHandy.MaterialInfo.MaterialQtyPlan">
+	<summary>MaterialQtyPlan</summary>
+</member><member name="F:MESPdHandy.MaterialInfo.MaterialQty">
+	<summary>MaterialQty</summary>
+</member><member name="T:MESPdHandy.MaterialInfo">
+	<summary>
+ Material information
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.GetSerialNoInfo(System.String,System.Int32,System.String)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.CreateSerialNo(System.String,System.Int32,System.String)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.ExistsPreviousResult(System.String,System.Int32,System.String)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.WorkStart(System.String,System.Int32,System.String)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.WorkEnd(System.String,System.Int32,System.String,MESPdHandy.UserInfo)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<param name="user"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.MaterialRegister(System.String,System.Int32,System.String,MESPdHandy.MaterialInfo)">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<param name="material"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.SpecRegister(System.String,System.Int32,System.String,System.Collections.Generic.List{MESPdHandy.SpecInfo})">
+	<summary>
+	</summary>
+	<param name="productPlanNo"></param>
+	<param name="processComponentNo"></param>
+	<param name="serialNo"></param>
+	<param name="spec"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.Service.ProductService.InterimProductId(System.String)">
+	<summary>
+	</summary>
+	<param name="serialNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.Service.ProductService">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.StringUtils">
+	<summary>
+ String Utility
+ </summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecButton.frmSpecButton_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecButton.btnInputValue1_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecButton.btnInputValue2_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecButton.btnInputValue3_Click(System.Object,System.EventArgs)">
+	<summary>
+	</summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpecButton.ToggleBtnInputValue(System.String)">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpec.frmSpec_Load(System.Object,System.EventArgs)">
+	<summary>
+ Form Load event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpec.btnF1_Click(System.Object,System.EventArgs)">
+	<summary>
+ F1 button click event
+ Move spec_type is to process if the ResultInputFrom
+ Move spec_type is to product if the ResultInputProductFrom
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpec.btnF2_Click(System.Object,System.EventArgs)">
+	<summary>
+ F2 button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpec.btnF3_Click(System.Object,System.EventArgs)">
+	<summary>
+ F3 button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.frmSpec.btnF4_Click(System.Object,System.EventArgs)">
+	<summary>
+ F4 button click event
+ </summary>
+	<param name="sender"></param>
+	<param name="e"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.frmSpec">
+	<summary>
+	</summary>
+	<remarks></remarks>
+</member><member name="M:MESPdHandy.DtxUtils.SetUserDefineKey(System.Int32,System.Int32)">
+	<summary>
+	</summary>
+	<param name="keyId"></param>
+	<param name="changeKey"></param>
+	<remarks></remarks>
+</member><member name="T:MESPdHandy.DtxUtils">
+	<summary>
+ Casio Handy Terminal(DT-X series) Utility
+ </summary>
+	<remarks></remarks>
+</member>
+</members>
+</doc>

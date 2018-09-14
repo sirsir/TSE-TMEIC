@@ -1,0 +1,27 @@
+SELECT
+    *
+FROM
+    m_spec
+WHERE
+    spec_id IN
+    (
+        (
+            SELECT
+                spec_id
+            FROM
+                m_spec_process_component
+            WHERE
+                product_id = /*productId*/'A'
+        )
+        UNION
+        (
+            SELECT
+                spec_id
+            FROM
+                m_spec_product_component
+            WHERE
+                product_id = /*productId*/'A'
+        )
+    )
+ORDER BY
+    spec_id

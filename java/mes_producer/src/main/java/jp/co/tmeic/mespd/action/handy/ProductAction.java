@@ -1,0 +1,456 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package jp.co.tmeic.mespd.action.handy;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import jp.co.tmeic.mespd.constant.ProcessProductStatus;
+import jp.co.tmeic.mespd.dto.handy.MaterialDto;
+import jp.co.tmeic.mespd.dto.handy.SpecDto;
+import jp.co.tmeic.mespd.entity.DMaterialProductResult;
+import jp.co.tmeic.mespd.entity.DProcessProductResult;
+import jp.co.tmeic.mespd.entity.DSpecProductResult;
+import jp.co.tmeic.mespd.service.DMaterialProductResultService;
+import jp.co.tmeic.mespd.service.DProcessProductResultService;
+import jp.co.tmeic.mespd.service.DProcessResultService;
+import jp.co.tmeic.mespd.service.DSpecProductResultService;
+import jp.co.tmeic.mespd.service.MaterialPlanService;
+import jp.co.tmeic.mespd.service.ProcessProductResultService;
+import jp.co.tmeic.mespd.service.SerialNoService;
+import jp.co.tmeic.mespd.service.SpecPlanService;
+import jp.co.tmeic.mespd.utils.JSONUtil;
+import net.arnx.jsonic.JSON;
+import net.arnx.jsonic.TypeReference;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.log4j.Logger;
+import org.seasar.extension.jdbc.JdbcManager;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.util.ResponseUtil;
+
+public class ProductAction {
+
+	/** Logger */
+	private Logger logger = Logger.getLogger(getClass());
+
+	/** request */
+	@Resource
+	protected HttpServletRequest request;
+
+	/** response */
+	@Resource
+	protected HttpServletResponse response;
+
+	/** session */
+	@Resource
+	protected HttpSession session;
+
+	@Resource
+	protected JdbcManager jdbcManager;
+
+	@Resource
+	protected DProcessProductResultService dProcessProductResultService;
+
+	@Resource
+	protected DMaterialProductResultService dMaterialProductResultService;
+
+	@Resource
+	protected DSpecProductResultService dSpecProductResultService;
+
+	@Resource
+	protected SerialNoService serialNoService;
+
+	@Resource
+	protected MaterialPlanService materialPlanService;
+
+	@Resource
+	protected SpecPlanService specPlanService;
+
+	@Resource
+	protected ProcessProductResultService processProductResultService;
+	
+	@Resource
+	protected DProcessResultService dProcessResultService;
+
+	/** シリアルNo情報 取得 */
+	@Execute(validator = false)
+	public String serialNoInfo() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			final String serialNo = request.getParameter("serialNo");
+			Integer revision = dProcessProductResultService.getIncompleteMinRevision(productPlanNo, processComponentNo, serialNo);
+
+			if (revision == null) {
+				// 未完了の計画が無ければ、最終履歴を取得
+				revision = dProcessProductResultService.getMaxRevision(productPlanNo, processComponentNo, serialNo);
+			}
+
+			DProcessProductResult dProcessProductResult =
+					dProcessProductResultService.findById(productPlanNo, processComponentNo, serialNo, revision);
+
+			Integer status = ProcessProductStatus.NONE;
+
+			if (dProcessProductResult != null) {
+				status = dProcessProductResult.status;
+			}
+
+			List<MaterialDto> materialDtos = materialPlanService.findBySerialNo(productPlanNo, processComponentNo, serialNo, revision);
+			List<SpecDto> specDtos = specPlanService.findSpecProductBySerialNo(productPlanNo, processComponentNo, serialNo, revision);
+
+			responseData.put("result", "OK");
+			responseData.put("status", status);
+			responseData.put("materialInfo", JSONUtil.encode(materialDtos));
+			responseData.put("specInfo", JSONUtil.encode(specDtos));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+	
+	
+	
+
+	/** シリアルNo作成 */
+	@Execute(validator = false)
+	public String createSerialNo() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			final String serialNo = request.getParameter("serialNo");
+
+			boolean useAutoNumberSerial = serialNoService.useAutoNumberSerial(productPlanNo, processComponentNo, serialNo);
+
+			if (useAutoNumberSerial) {
+
+				String newSerialNo = serialNoService.createSerialNo();
+
+				responseData.put("result", "OK");
+				responseData.put("serialNo", newSerialNo);
+			} else {
+
+				if (StringUtils.isNotBlank(serialNo)) {
+					responseData.put("result", "OK");
+					responseData.put("serialNo", serialNo);
+
+				} else {
+					responseData.put("result", "NG");
+					responseData.put("errorId", "SerialRequired");
+				}
+			}
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 前工程の製品実績有無 */
+	@Execute(validator = false)
+	public String existsPreviousResult() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			final String serialNo = request.getParameter("serialNo");
+
+			boolean isExistsPreviousResult =
+					dProcessProductResultService.isExistsPreviousResult(productPlanNo, processComponentNo, serialNo);
+
+			responseData.put("result", "OK");
+			responseData.put("isExists", isExistsPreviousResult);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 作業開始 */
+	@Execute(validator = false)
+	public String workStart() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			final String serialNo = request.getParameter("serialNo");
+
+			boolean isStart = processProductResultService.workStart(productPlanNo, processComponentNo, serialNo);
+
+			responseData.put("result", "OK");
+			responseData.put("isStart", isStart);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+	
+	
+	
+	/** 作業開始 */
+	@Execute(validator = false)
+	public String workStart2() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			//final String serialNo = request.getParameter("serialNo");
+			final String barcode = request.getParameter("barcode");
+			final String serialNo = jdbcManager.selectBySql(
+					String.class,
+					"select serial_no from v_d_barcode_association where barcode_no =? and product_plan_no =(select max( product_plan_no) from v_d_barcode_association where barcode_no =?)",
+					barcode,barcode).getSingleResult();
+
+			boolean isStart = processProductResultService.workStart(productPlanNo, processComponentNo, serialNo);
+			
+			if (isStart) {
+				dProcessResultService.processStart(productPlanNo, processComponentNo);
+				
+				
+				
+			}
+
+			responseData.put("result", "OK");
+			responseData.put("isStart", isStart);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 作業完了 */
+	@Execute(validator = false)
+	public String workFinish() {
+		
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			final String serialNo = request.getParameter("serialNo");
+			final String userId = request.getParameter("userId");
+			final String userName = request.getParameter("userName");
+			
+			
+
+			boolean isComplet = processProductResultService.workEnd(productPlanNo, processComponentNo, serialNo, userId, userName);
+
+			responseData.put("result", "OK");
+			responseData.put("isComplet", isComplet);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 中間品ID 取得 */
+	@Execute(validator = false)
+	public String interimProductId() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String serialNo = request.getParameter("serialNo");
+
+			String productId = dProcessProductResultService.findProductId(serialNo);
+
+			responseData.put("result", "OK");
+			responseData.put("productId", productId);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 部材実績登録 取得 */
+	@Execute(validator = false)
+	public String materialRegister() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			final String serialNo = request.getParameter("serialNo");
+			final Integer revision = dProcessProductResultService.getIncompleteMinRevision(productPlanNo, processComponentNo, serialNo);
+			final Integer materialComponentNo = NumberUtils.toInt(request.getParameter("materialComponentNo"));
+			final Integer materialQty = NumberUtils.toInt(request.getParameter("materialQty"));
+
+			DMaterialProductResult dMaterialProductResult =
+					dMaterialProductResultService.findById(productPlanNo, processComponentNo, serialNo, revision, materialComponentNo);
+
+			boolean isNewRow = false;
+
+			if (dMaterialProductResult == null) {
+
+				isNewRow = true;
+
+				dMaterialProductResult = new DMaterialProductResult();
+
+				dMaterialProductResult.productPlanNo = productPlanNo;
+				dMaterialProductResult.processComponentNo = processComponentNo;
+				dMaterialProductResult.serialNo = serialNo;
+				dMaterialProductResult.revision = revision;
+				dMaterialProductResult.materialComponentNo = materialComponentNo;
+			}
+
+			dMaterialProductResult.materialQty = materialQty;
+
+			if (isNewRow) {
+				dMaterialProductResultService.insert(dMaterialProductResult);
+			} else {
+				dMaterialProductResultService.update(dMaterialProductResult);
+			}
+
+			responseData.put("result", "OK");
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 仕様実績登録 取得 */
+	@Execute(validator = false)
+	public String specRegister() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+			final String serialNo = request.getParameter("serialNo");
+			final Integer revision = dProcessProductResultService.getIncompleteMinRevision(productPlanNo, processNo, serialNo);
+
+			List<DSpecProductResult> dSpecProductResults =
+					JSON.decode(request.getParameter("specs"),
+							new TypeReference<List<DSpecProductResult>>() {
+							});
+
+			List<DSpecProductResult> tmpDSpecProductResults = new ArrayList<>();
+
+			for (DSpecProductResult dSpecProductResult : dSpecProductResults) {
+
+				DSpecProductResult tmpDSpecProductResult =
+						dSpecProductResultService.findById(productPlanNo, processNo, serialNo, revision, dSpecProductResult.specComponentNo);
+
+				if (tmpDSpecProductResult == null) {
+
+					tmpDSpecProductResult = new DSpecProductResult();
+
+					tmpDSpecProductResult.productPlanNo = productPlanNo;
+					tmpDSpecProductResult.processComponentNo = processNo;
+					tmpDSpecProductResult.serialNo = serialNo;
+					tmpDSpecProductResult.revision = revision;
+					tmpDSpecProductResult.specComponentNo = dSpecProductResult.specComponentNo;
+				}
+
+				tmpDSpecProductResult.inputValue = dSpecProductResult.inputValue;
+
+				tmpDSpecProductResults.add(tmpDSpecProductResult);
+			}
+
+			dSpecProductResultService.insertOrUpdate(tmpDSpecProductResults);
+			processProductResultService.updateQuality(productPlanNo, processNo);
+
+			responseData.put("result", "OK");
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+}

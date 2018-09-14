@@ -1,0 +1,9 @@
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\bin\Debug\MESPdControl.dll
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\bin\Debug\MESPdControl.pdb
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\bin\Debug\MESPdControl.xml
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\obj\Debug\MESPdControl.Resources.resources
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\obj\Debug\MESPdControl.vbproj.GenerateResource.Cache
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\obj\Debug\MESPdControl.dll
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\obj\Debug\MESPdControl.xml
+C:\Users\Administrator\Documents\Visual Studio 2008\Projects\MESPdHandy\MESPdControl\obj\Debug\MESPdControl.pdb

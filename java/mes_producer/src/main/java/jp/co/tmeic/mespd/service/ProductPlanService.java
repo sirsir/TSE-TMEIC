@@ -1,0 +1,471 @@
+package jp.co.tmeic.mespd.service;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Generated;
+import javax.annotation.Resource;
+
+import jp.co.tmeic.mespd.constant.ProductStatus;
+import jp.co.tmeic.mespd.dto.jqgrid.product.DProductPlanDto;
+import jp.co.tmeic.mespd.entity.DMaterialPlan;
+import jp.co.tmeic.mespd.entity.DProcessPlan;
+import jp.co.tmeic.mespd.entity.DProductPlan;
+import jp.co.tmeic.mespd.entity.DProductResult;
+import jp.co.tmeic.mespd.entity.DSpecAttributePlan;
+import jp.co.tmeic.mespd.entity.DSpecPlan;
+import jp.co.tmeic.mespd.entity.DSpecProcessPlan;
+import jp.co.tmeic.mespd.entity.DSpecProductPlan;
+import jp.co.tmeic.mespd.entity.MMaterialComponent;
+import jp.co.tmeic.mespd.entity.MProcessComponent;
+import jp.co.tmeic.mespd.entity.MProduct;
+import jp.co.tmeic.mespd.entity.MSpec;
+import jp.co.tmeic.mespd.entity.MSpecAttribute;
+import jp.co.tmeic.mespd.entity.MSpecProcessComponent;
+import jp.co.tmeic.mespd.entity.MSpecProductComponent;
+import jp.co.tmeic.mespd.entity.MWorkCalendar;
+import jp.co.tmeic.mespd.entity.MWorkCalendarBreak;
+import jp.co.tmeic.mespd.utils.ArrayUtil;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.seasar.extension.jdbc.JdbcManager;
+import org.seasar.framework.beans.util.Beans;
+
+/**
+ * {@link DProductPlan}のサービスクラスです。
+ *
+ */
+@Generated(value = { "S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl" })
+public class ProductPlanService {
+
+	/** jdbcManager */
+	@Resource
+	protected JdbcManager jdbcManager;
+
+	@Resource
+	protected MProductService mProductService;
+
+	@Resource
+	protected MSpecService mSpecService;
+
+	@Resource
+	protected MSpecAttributeService mSpecAttributeService;
+
+	@Resource
+	protected DProductPlanService dProductPlanService;
+
+	@Resource
+	protected DProcessPlanService dProcessPlanService;
+
+	@Resource
+	protected MWorkCalendarService mWorkCalendarService;
+
+	@Resource
+	protected DMaterialPlanService dMaterialPlanService;
+
+	@Resource
+	protected DSpecPlanService dSpecPlanService;
+
+	@Resource
+	protected DSpecProcessPlanService dSpecProcessPlanService;
+
+	@Resource
+	protected DSpecProductPlanService dSpecProductPlanService;
+
+	@Resource
+	protected DSpecAttributePlanService dSpecAttributePlanService;
+
+	@Resource
+	protected ScheduleCalculationService scheduleCalculationService;
+
+	@Resource
+	protected DProductResultService dProductResultService;
+
+	/**
+	 * 製造日で製造計画を検索します。
+	 *
+	 * @param startTime
+	 *            検索開始日
+	 * @param endTime
+	 *            検索終了日
+	 * @return 製造計画
+	 */
+	public List<DProductPlanDto> findByManufactureDate(Date startTime, Date endTime) {
+
+		return ArrayUtil.copy(
+				DProductPlanDto.class,
+				dProductPlanService.findByManufactureDate(startTime, endTime));
+	}
+
+	/**
+	 * 指定の製造計画Noの計画データを作成します。
+	 *
+	 * @param productPlanNo
+	 */
+	public void createPlanData(String productPlanNo) {
+
+		DProductPlan dProductPlan = dProductPlanService.findById(productPlanNo);
+		MProduct mProduct = mProductService.findByPartNo(dProductPlan.partNo);
+		dProductPlan.partName = mProduct.partName;
+		dProductPlan.productKind = mProduct.productKind;
+
+		dProductPlanService.update(dProductPlan);
+
+		// 仕様属性計画
+		List<MSpecAttribute> mSpecAttributes = mSpecAttributeService.findByPartNo(dProductPlan.partNo);
+
+		for (MSpecAttribute mSpecAttribute : mSpecAttributes) {
+
+			DSpecAttributePlan dSpecAttributePlan = Beans.createAndCopy(DSpecAttributePlan.class, mSpecAttribute).execute();
+			dSpecAttributePlan.productPlanNo = productPlanNo;
+
+			dSpecAttributePlanService.insert(dSpecAttributePlan);
+		}
+
+		// 仕様計画
+		List<MSpec> mSpecs = mSpecService.findByPartNo(dProductPlan.partNo);
+
+		for (MSpec mSpec : mSpecs) {
+
+			DSpecPlan dSpecPlan = Beans.createAndCopy(DSpecPlan.class, mSpec).execute();
+			dSpecPlan.productPlanNo = productPlanNo;
+
+			dSpecPlanService.insert(dSpecPlan);
+		}
+
+		// 工程構成Noを採番しなおすため、processOrderの順に並び替える
+		List<MProcessComponent> mProcess =
+				mProduct.MProcessComponentList
+				.stream()
+				.sorted((s1, s2) -> s1.processOrder - s2.processOrder)
+				.collect(Collectors.toList());
+
+		for (int i = 0; i < mProcess.size(); i++) {
+
+			int currentProcessComponentNo = i + 1;
+
+			// 工程計画
+			MProcessComponent mProcessComponent = mProcess.get(i);
+			DProcessPlan dProcessPlan = new DProcessPlan();
+			Beans.copy(mProcessComponent, dProcessPlan).execute();
+			dProcessPlan.productPlanNo = productPlanNo;
+			dProcessPlan.processComponentNo = currentProcessComponentNo;
+			dProcessPlan.processName = mProcessComponent.MProcess.processName;
+			dProcessPlan.planStartDate = dProductPlan.planStartDate;
+			dProcessPlan.planEndDate = dProductPlan.planEndDate;
+			dProcessPlan.planQty = dProductPlan.planQty;
+			dProcessPlan.unitSize = mProcessComponent.unitSize;
+			
+			dProcessPlanService.insert(dProcessPlan);
+
+			// 工程単位仕様計画
+			for (MSpecProcessComponent mSpecProcessComponent : mProcessComponent.MSpecProcessComponentList) {
+
+				DSpecProcessPlan dSpecProcessPlan = new DSpecProcessPlan();
+				Beans.copy(mSpecProcessComponent, dSpecProcessPlan).execute();
+				dSpecProcessPlan.productPlanNo = productPlanNo;
+				dSpecProcessPlan.processComponentNo = currentProcessComponentNo;
+
+				dSpecProcessPlanService.insert(dSpecProcessPlan);
+			}
+
+			// 製品単位仕様計画
+			for (MSpecProductComponent mSpecProductComponent : mProcessComponent.MSpecProductComponentList) {
+
+				DSpecProductPlan dSpecProductPlan = new DSpecProductPlan();
+				Beans.copy(mSpecProductComponent, dSpecProductPlan).execute();
+				dSpecProductPlan.productPlanNo = productPlanNo;
+				dSpecProductPlan.processComponentNo = currentProcessComponentNo;
+
+				dSpecProductPlanService.insert(dSpecProductPlan);
+			}
+
+			// 部材計画
+			for (MMaterialComponent mMaterialComponent : mProcessComponent.MMaterialComponentList) {
+
+				DMaterialPlan dMaterialPlan = new DMaterialPlan();
+				Beans.copy(mMaterialComponent, dMaterialPlan).execute();
+				dMaterialPlan.productPlanNo = productPlanNo;
+				dMaterialPlan.processComponentNo = currentProcessComponentNo;
+				dMaterialPlan.materialName = mMaterialComponent.MMaterial.materialName;
+
+				dMaterialPlanService.insert(dMaterialPlan);
+			}
+		}
+	}
+
+	/**
+	 * 指定製品IDで、製造予定の計画に状態が未開始ものが存在するか確認する。
+	 *
+	 * @param partNo
+	 * @return
+	 */
+	public boolean isProductPlanning(String partNo) {
+
+		List<DProductPlan> list = dProductPlanService.findNotStartByPartNo(partNo);
+
+		return (list.size() > 0);
+	}
+
+	/**
+	 * 製造計画Noからスケジュールを再計算します。
+	 *
+	 * @param productPlanNo
+	 *            製造計画No
+	 */
+	public void reschedule(String productPlanNo) {
+
+		if (StringUtils.isBlank(productPlanNo)) {
+			return;
+		}
+
+		DProductPlan dProductPlan = dProductPlanService.findById(productPlanNo);
+
+		if (dProductResultService.getStatus(productPlanNo) == ProductStatus.NONE) {
+
+			List<DProcessPlan> dProcessPlans = new ArrayList<>();
+			MProduct mProduct = mProductService.findByPartNo(dProductPlan.partNo);
+
+			// 製品マスタがシステム管理外で削除された場合の対処
+			if (mProduct == null) {
+				return;
+			}
+
+			for (MProcessComponent mProcessComponent : mProduct.MProcessComponentList) {
+
+				DProcessPlan dProcessPlan = new DProcessPlan();
+				Beans.copy(mProcessComponent, dProcessPlan).execute();
+				dProcessPlans.add(dProcessPlan);
+			}
+
+			updateProductPlanAndCalculateOfProcessPlans(dProductPlan, dProcessPlans);
+
+			return;
+		}
+
+		List<DProcessPlan> dProcessPlans = dProcessPlanService.findOrderByProcessIdFromProductPlanNo(productPlanNo);
+		List<DProcessPlan> rescheduleProcessPlans = updateProductPlanAndCalculateOfProcessPlans(dProductPlan, dProcessPlans);
+
+		if (rescheduleProcessPlans.isEmpty()) {
+			return;
+		}
+
+		for (DProcessPlan processPlan : rescheduleProcessPlans) {
+			dProcessPlanService.update(processPlan);
+		}
+	}
+
+	/**
+	 * 未開始の製造計画のスケジュールを再計算し、更新します。
+	 */
+	public void rescheduleNonStart() {
+
+		List<DProductPlan> dProductPlans = dProductPlanService.findNotStart();
+
+		for (DProductPlan dProductPlan : dProductPlans) {
+
+			reschedule(dProductPlan.productPlanNo);
+		}
+	}
+
+	/**
+	 * 指定製品IDのスケジュールを再計算し、更新します。
+	 *
+	 * @param partNo
+	 *            製品ID
+	 */
+	public void rescheduleOfPartNo(String partNo) {
+
+		List<DProductPlan> productPlans = dProductPlanService.findByPartNo(partNo);
+
+		for (DProductPlan productPlan : productPlans) {
+
+			if (!dProductPlanService.isUpdatable(productPlan.productPlanNo)) {
+				continue;
+			}
+
+			reschedule(productPlan.productPlanNo);
+		}
+	}
+
+	/**
+	 * 製造計画の更新と工程の予定を計算します。
+	 * @param dProductPlan
+	 *            製造計画
+	 * @param dProcessPlans
+	 *            工程計画リスト
+	 * @return 予定計算反映後の工程計画リスト
+	 */
+	private List<DProcessPlan> updateProductPlanAndCalculateOfProcessPlans(DProductPlan dProductPlan, List<DProcessPlan> dProcessPlans) {
+
+		List<DProcessPlan> resultProcessPlans = calculateScheduleOfProcessPlans(dProductPlan.planStartDate, dProductPlan.planQty, dProcessPlans);
+
+		if (resultProcessPlans.isEmpty()) {
+			return resultProcessPlans;
+		}
+
+		dProductPlan.planEndDate = resultProcessPlans.get(resultProcessPlans.size() - 1).planEndDate;
+
+		dProductPlanService.update(dProductPlan);
+
+		return resultProcessPlans;
+	}
+
+	/**
+	 * 工程の予定を計算します。
+	 * @param planStartDate
+	 *            製造計画開始予定
+	 * @param planQty
+	 *            製造予定数量
+	 * @param dProcessPlans
+	 *            工程計画リスト
+	 * @return 予定計算反映後の工程計画リスト
+	 */
+	private List<DProcessPlan> calculateScheduleOfProcessPlans(Timestamp planStartDate, int planQty, List<DProcessPlan> dProcessPlans) {
+
+		boolean isExclusion = (planStartDate == null || planQty < 1 || dProcessPlans.isEmpty());
+
+		if (isExclusion) {
+			return new ArrayList<>();
+		}
+
+		List<DProcessPlan> resultProcessPlans = new ArrayList<>();
+
+		// 操業カレンダマスタ
+		final MWorkCalendar mWorkCalendar = getWorkCalendar(planStartDate);
+
+		for (int i = 0; i < dProcessPlans.size(); i++) {
+
+			MWorkCalendar currentMWorkCalendar = mWorkCalendar;
+			List<MWorkCalendarBreak> mWorkCalendarBreaks = getWorkCalendarBreaks(currentMWorkCalendar);
+
+			DProcessPlan beforeProcessPlan = null;
+
+			if (i != 0) {
+				beforeProcessPlan = resultProcessPlans.get(i - 1);
+			}
+
+			DProcessPlan afterProcessPlan = dProcessPlans.get(i);
+
+			boolean isStepOverDay = false;
+			boolean isNextStepOverDay = true;
+
+			while (isNextStepOverDay) {
+
+				isNextStepOverDay =
+						scheduleCalculationService.calculateScheduleOfStartDate(
+								planStartDate,
+								planQty,
+								beforeProcessPlan,
+								afterProcessPlan,
+								currentMWorkCalendar,
+								mWorkCalendarBreaks,
+								isStepOverDay);
+
+				isStepOverDay = isNextStepOverDay;
+
+				if (isNextStepOverDay) {
+					currentMWorkCalendar = getWorkCalendar(afterProcessPlan.planStartDate);
+					mWorkCalendarBreaks = getWorkCalendarBreaks(currentMWorkCalendar);
+				}
+			}
+
+			isNextStepOverDay = true;
+
+			while (isNextStepOverDay) {
+
+				isNextStepOverDay =
+						scheduleCalculationService.calculateScheduleOfEndDate(
+								planQty,
+								afterProcessPlan,
+								currentMWorkCalendar,
+								mWorkCalendarBreaks,
+								isStepOverDay);
+
+				isStepOverDay = isNextStepOverDay;
+
+				if (isNextStepOverDay) {
+					// 前回チェックした操業カレンダの次日の操業カレンダをチェックする
+					Date workDay = DateUtils.addDays(currentMWorkCalendar.workDay, 1);
+					currentMWorkCalendar = getWorkCalendar(workDay);
+					mWorkCalendarBreaks = getWorkCalendarBreaks(currentMWorkCalendar);
+				}
+			}
+
+			resultProcessPlans.add(afterProcessPlan);
+		}
+
+		return resultProcessPlans;
+	}
+
+	/**
+	 * 指定日の稼働マスタを取得します。
+	 *
+	 * @param workDay
+	 *            日付
+	 * @return 稼働マスタ
+	 */
+	private MWorkCalendar getWorkCalendar(Date workDay) {
+
+		MWorkCalendar mWorkCalendar = mWorkCalendarService.findByWorkDay(workDay);
+
+		if (mWorkCalendar == null) {
+			mWorkCalendar = new MWorkCalendar();
+			mWorkCalendar.workDay = new java.sql.Date(workDay.getTime());
+			mWorkCalendar.holiday = false;
+		}
+
+		return mWorkCalendar;
+	}
+
+	/**
+	 * 休憩時間リストを取得します。
+	 *
+	 * @param mWorkCalendar
+	 *            稼働マスタ
+	 * @return 休憩時間リスト
+	 */
+	private List<MWorkCalendarBreak> getWorkCalendarBreaks(MWorkCalendar mWorkCalendar) {
+
+		if (mWorkCalendar == null) {
+			return null;
+		}
+
+		return mWorkCalendar.MWorkCalendarBreakList;
+	}
+
+	/**
+	 * 製品名を取得します。
+	 *
+	 * @param productPlanNo
+	 *            製造計画No
+	 * @return 製品名
+	 */
+	public String getProductName(String productPlanNo) {
+
+		DProductPlan dProductPlan = dProductPlanService.findById(productPlanNo);
+		DProductResult dProductResult = dProductResultService.findById(productPlanNo);
+
+		int status = ProductStatus.NONE;
+
+		if (dProductResult != null) {
+			status = dProductResult.status;
+		}
+
+		if (status != ProductStatus.NONE) {
+			return dProductPlan.partName;
+		}
+
+		MProduct mProduct = mProductService.findById(dProductPlan.partNo);
+
+		if (mProduct != null) {
+			return mProduct.partName;
+		}
+
+		return StringUtils.EMPTY;
+	}
+}

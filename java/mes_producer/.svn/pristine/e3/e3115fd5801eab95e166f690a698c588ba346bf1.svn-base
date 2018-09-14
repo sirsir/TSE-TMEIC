@@ -1,0 +1,449 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package jp.co.tmeic.mespd.action.master;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+
+import jp.co.tmeic.mespd.action.AbstractAction;
+import jp.co.tmeic.mespd.constant.ErrorForeignKey;
+import jp.co.tmeic.mespd.convert.MProcessConvert;
+import jp.co.tmeic.mespd.dto.jqgrid.master.MMaterialComponentDto;
+import jp.co.tmeic.mespd.dto.jqgrid.master.MProcessComponentDto;
+import jp.co.tmeic.mespd.dto.jqgrid.master.MProductDto;
+import jp.co.tmeic.mespd.dto.jqgrid.master.MSpecProcessComponentDto;
+import jp.co.tmeic.mespd.dto.jqgrid.master.MSpecProductComponentDto;
+import jp.co.tmeic.mespd.entity.MMaterialComponent;
+import jp.co.tmeic.mespd.entity.MProcessComponent;
+import jp.co.tmeic.mespd.entity.MProduct;
+import jp.co.tmeic.mespd.entity.MSpecProcessComponent;
+import jp.co.tmeic.mespd.entity.MSpecProductComponent;
+import jp.co.tmeic.mespd.exception.ValidationException;
+import jp.co.tmeic.mespd.form.master.ProductForm;
+import jp.co.tmeic.mespd.service.MMaterialComponentService;
+import jp.co.tmeic.mespd.service.MMaterialService;
+import jp.co.tmeic.mespd.service.MProcessComponentService;
+import jp.co.tmeic.mespd.service.MProcessService;
+import jp.co.tmeic.mespd.service.MProductService;
+import jp.co.tmeic.mespd.service.MSpecProcessComponentService;
+import jp.co.tmeic.mespd.service.MSpecProductComponentService;
+import jp.co.tmeic.mespd.service.MSpecService;
+import jp.co.tmeic.mespd.service.ProductPlanService;
+import jp.co.tmeic.mespd.service.ProductService;
+import jp.co.tmeic.mespd.utils.ArrayUtil;
+import jp.co.tmeic.mespd.utils.JSONUtil;
+import jp.co.tmeic.mespd.utils.JqgridUtil;
+import jp.co.tmeic.mespd.utils.JqueryUtil;
+import jp.co.tmeic.mespd.utils.SystemParameterUtil;
+import jp.co.tmeic.mespd.utils.ValidateUtil;
+import net.arnx.jsonic.JSON;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.seasar.framework.beans.util.Beans;
+import org.seasar.framework.exception.SQLRuntimeException;
+import org.seasar.sastruts.example.annotation.Auth;
+import org.seasar.struts.annotation.ActionForm;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.util.MessageResourcesUtil;
+
+@Auth(authorityId = "operation")
+public class ProductAction extends AbstractAction {
+
+	/** Logger */
+	private Logger logger = Logger.getLogger(getClass());
+
+	/** UserTransaction */
+	public UserTransaction userTransaction;
+
+	/** ActionForm */
+	@Resource
+	@ActionForm
+	protected ProductForm productForm;
+
+	@Resource
+	protected MProductService mProductService;
+
+	@Resource
+	protected MSpecService mSpecService;
+
+	@Resource
+	protected MMaterialService mMaterialService;
+
+	@Resource
+	protected MProcessComponentService mProcessComponentService;
+
+	@Resource
+	protected MSpecProductComponentService mSpecProductComponentService;
+
+	@Resource
+	protected MSpecProcessComponentService mSpecProcessComponentService;
+
+	@Resource
+	protected MMaterialComponentService mMaterialComponentService;
+
+	@Resource
+	protected ProductService productService;
+
+	@Resource
+	protected ProductPlanService productPlanService;
+
+	@Resource
+	protected MProcessService mProcessService;
+
+	/** 検索 */
+	@Execute(validator = false)
+	public String index() {
+
+		try {
+
+			productForm.systemProperties = SystemParameterUtil.getProperty();
+			productForm.materialQuantityMaxLength = SystemParameterUtil.materialQuantityMaxLength();
+
+			List<MProductDto> products = ArrayUtil.copy(MProductDto.class, mProductService.findAllOrderById());
+			
+			productForm.productJson = JSONUtil.encode(JqgridUtil.init(products));
+
+			productForm.mProcess = JqgridUtil.toSelect(mProcessService.getLabelValue());
+			productForm.mSpec = JqgridUtil.toSelect(mSpecService.getLabelValue());
+			productForm.mMaterial = JqgridUtil.toSelect(mMaterialService.getLabelValue());
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+		}
+
+		return "index.jsp";
+	}
+
+	/** 製品の工程・仕様・部材情報を取得する。 */
+	@Execute(validator = false)
+	public String processOfProduct() {
+
+		Map<String, String> json = new HashMap<>();
+
+		try {
+			String partNo = request.getParameter("partNo");
+
+			List<MProcessComponent> mProcessComponents = mProcessComponentService.findByPartNoOrderByProcessOrder(partNo);
+			List<MProcessComponentDto> processComponents = MProcessConvert.convertMProcessComponentDto(mProcessComponents);
+
+			json.put("result", "OK");
+			json.put("processList", JSONUtil.encode(processComponents));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+		} finally {
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+	/** 登録 */
+	@Execute(validator = false)
+	public String register() {
+
+		Map<String, String> json = new HashMap<>();
+
+		boolean isCommit = false;
+
+		try {
+			MProductDto[] products = JSON.decode(productForm.productJson, MProductDto[].class);
+
+			registerValidate(Arrays.asList(products));
+			registerExe(Arrays.asList(products));
+
+			json.put("result", "OK");
+
+			isCommit = true;
+
+		} catch (ValidationException ex) {
+			ex.printStackTrace();
+			json.put("result", "NG");
+			json.put("message", ex.getMessage());
+
+		} catch (SQLRuntimeException ex) {
+			ex.printStackTrace();
+			String message = MessageResourcesUtil.getMessage(locale(), "errors.register");
+			String foreignKey = ErrorForeignKey.getForeignKey(ex);
+
+			if (StringUtils.equals(foreignKey, ErrorForeignKey.FKEY_M_MATERIAL_COMPONENT_MATERIAL_ID)) {
+				message = MessageResourcesUtil.getMessage(locale(), "errors.interim.product.change");
+			}
+
+			logger.warn(message, ex);
+			json.put("result", "NG");
+			json.put("message", message);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+			json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.register"));
+		} finally {
+
+			if (!isCommit) {
+				try {
+					userTransaction.setRollbackOnly();
+				} catch (IllegalStateException | SystemException ex) {
+					logger.error("Exception", ex);
+				}
+			}
+
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+	/**
+	 * 登録可能か検証を行う。
+	 *
+	 * @param products
+	 */
+	private void registerValidate(List<MProductDto> products) {
+
+		for (MProductDto product : products) {
+
+			ValidateUtil.required("part.no", product.partNo);
+			ValidateUtil.maxlength("part.no", product.partNo, 10);
+
+			ValidateUtil.required("part.name", product.partName);
+			ValidateUtil.maxlength("part.name", product.partName, 30);
+
+			ValidateUtil.required("product.plating.machine", product.platingMachine);
+			ValidateUtil.required("kind", product.productKind);
+
+			for (MProcessComponentDto process : product.process) {
+
+				if (StringUtils.isBlank(process.processId)) {
+					continue;
+				}
+
+				ValidateUtil.maxlength("process.contents", process.processContents, 30);
+
+				ValidateUtil.required("process.time", process.processTime);
+				ValidateUtil.minInteger("process.time", process.processTime, 0);
+
+				ValidateUtil.minInteger("personnel.required", process.personnelRequired, 0);
+				ValidateUtil.minInteger("parallel.work", process.parallelWork, 0);
+
+				for (MMaterialComponentDto material : process.materials) {
+
+					if (StringUtils.isBlank(material.materialId)) {
+						continue;
+					}
+
+					ValidateUtil.minInteger("quantity", material.materialQty, 0);
+					ValidateUtil.maxlength("material.unit", material.materialUnit, 10);
+				}
+			}
+		}
+	}
+
+	/** 登録実行 */
+	private void registerExe(List<MProductDto> products) {
+
+		for (MProductDto product : products) {
+
+			MProduct mProduct = Beans.createAndCopy(MProduct.class, product).execute();
+
+			switch (product.crud) {
+				case "C":
+					mProductService.insert(mProduct);
+					break;
+
+				case "U":
+					mProductService.update(mProduct);
+					break;
+			}
+
+			final String partNo = product.partNo;
+
+			switch (product.crud) {
+				case "C":
+				case "U":
+
+					for (MProcessComponentDto process : product.process) {
+
+						MProcessComponent mProcessComponent = Beans.createAndCopy(MProcessComponent.class, process).execute();
+
+						mProcessComponent.partNo = partNo;
+
+						mProcessComponentService.register(mProcessComponent);
+
+						if (StringUtils.isBlank(mProcessComponent.processId)) {
+							continue;
+						}
+
+						for (MSpecProductComponentDto specProduct : process.specProducts) {
+
+							MSpecProductComponent mSpecProductComponent = Beans.createAndCopy(MSpecProductComponent.class, specProduct).execute();
+
+							mSpecProductComponent.partNo = partNo;
+							mSpecProductComponent.processComponentNo = mProcessComponent.processComponentNo;
+
+							mSpecProductComponentService.register(mSpecProductComponent);
+						}
+
+						for (MSpecProcessComponentDto specProcess : process.specProcesses) {
+
+							MSpecProcessComponent mSpecProcessComponent = Beans.createAndCopy(MSpecProcessComponent.class, specProcess).execute();
+
+							mSpecProcessComponent.partNo = partNo;
+							mSpecProcessComponent.processComponentNo = mProcessComponent.processComponentNo;
+
+							mSpecProcessComponentService.register(mSpecProcessComponent);
+						}
+
+						for (MMaterialComponentDto material : process.materials) {
+
+							MMaterialComponent mMaterialComponent = Beans.createAndCopy(MMaterialComponent.class, material).execute();
+
+							mMaterialComponent.partNo = partNo;
+							mMaterialComponent.processComponentNo = mProcessComponent.processComponentNo;
+
+							mMaterialComponentService.register(mMaterialComponent);
+						}
+					}
+
+					break;
+			}
+
+			// スケジュール再計算
+			switch (product.crud) {
+				case "U":
+					productPlanService.rescheduleOfPartNo(partNo);
+					break;
+			}
+		}
+
+		productService.materialRegister();
+	}
+
+	/** 削除 */
+	@Execute(validator = false)
+	public String delete() {
+
+		Map<String, String> json = new HashMap<>();
+
+		boolean isCommit = false;
+
+		try {
+			String partNo = request.getParameter("deletePartId");
+
+			boolean isPlanning = productPlanService.isProductPlanning(partNo);
+
+			if (isPlanning) {
+				throw new ValidationException(MessageResourcesUtil.getMessage(locale(), "errors.product.delete.planning"));
+			}
+
+			mProductService.deleteById(partNo);
+
+			json.put("result", "OK");
+
+			isCommit = true;
+
+		} catch (ValidationException ex) {
+			json.put("result", "NG");
+			json.put("message", ex.getMessage());
+
+		} catch (SQLRuntimeException ex) {
+
+			String message = MessageResourcesUtil.getMessage(locale(), "errors.delete");
+			String foreignKey = ErrorForeignKey.getForeignKey(ex);
+
+			if (StringUtils.equals(foreignKey, ErrorForeignKey.FKEY_M_MATERIAL_COMPONENT_MATERIAL_ID)) {
+				message = MessageResourcesUtil.getMessage(locale(), "errors.interim.product.delete");
+			}
+
+			logger.warn(message, ex);
+			json.put("result", "NG");
+			json.put("message", message);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+			json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.delete"));
+		} finally {
+
+			if (!isCommit) {
+				try {
+					userTransaction.setRollbackOnly();
+				} catch (IllegalStateException | SystemException ex) {
+					logger.error("Exception", ex);
+				}
+			}
+
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+	/** コピー */
+	@Execute(validator = false)
+	public String copy() {
+
+		Map<String, String> json = new HashMap<>();
+
+		boolean isCommit = false;
+
+		try {
+			String srcProductCode = request.getParameter("srcProductCode");
+			String destProductCode = request.getParameter("destProductCode");
+			String destProductName = request.getParameter("destProductName");
+
+			if (mProductService.isExist(destProductCode)) {
+				throw new ValidationException(MessageResourcesUtil.getMessage(locale(), "errors.copy.not.unique"));
+			}
+
+			productService.copy(srcProductCode, destProductCode, destProductName);
+			productService.materialRegister();
+
+			json.put("result", "OK");
+
+			isCommit = true;
+
+		} catch (ValidationException ex) {
+			json.put("result", "NG");
+			json.put("message", ex.getMessage());
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+			json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.copy"));
+		} finally {
+
+			if (!isCommit) {
+				try {
+					userTransaction.setRollbackOnly();
+				} catch (IllegalStateException | SystemException ex) {
+					logger.error("Exception", ex);
+				}
+			}
+
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+}

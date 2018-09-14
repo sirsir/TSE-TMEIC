@@ -1,0 +1,134 @@
+package jp.co.tmeic.mespd.service;
+
+import static jp.co.tmeic.mespd.entity.MUsersNames.*;
+import static org.seasar.extension.jdbc.operation.Operations.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Generated;
+
+import jp.co.tmeic.mespd.dto.jqgrid.master.MUsersRoleDto;
+import jp.co.tmeic.mespd.entity.MUsers;
+
+import org.seasar.extension.jdbc.where.SimpleWhere;
+import org.seasar.framework.beans.util.Beans;
+
+/**
+ * {@link MUsers}のサービスクラスです。
+ *
+ */
+@Generated(value = { "S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl" })
+public class MUsersService extends AbstractService<MUsers> {
+
+	/**
+	 * 識別子でエンティティを検索します。
+	 *
+	 * @param userId
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public MUsers findById(String userId) {
+		return select().id(userId).getSingleResult();
+	}
+
+	/**
+	 * 識別子の昇順ですべてのエンティティを検索します。
+	 *
+	 * @return エンティティのリスト
+	 */
+	public List<MUsers> findAllOrderById() {
+		return select().orderBy(asc(userId())).getResultList();
+	}
+
+	/**
+	 * 識別子でエンティティを検索します。
+	 *
+	 * @param userId
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public MUsers findByUserId(String userId) {
+		return select()
+				.leftOuterJoin(MUsersRoleList())
+				.leftOuterJoin(MUsersRoleList().MRole())
+				.leftOuterJoin(MUsersRoleList().MRole().MRoleAuthorityList())
+				.leftOuterJoin(MUsersRoleList().MRole().MRoleAuthorityList().MAuthority())
+				.id(userId)
+				.getSingleResult();
+	}
+
+	/**
+	 * 識別子の昇順ですべてのエンティティを検索します。
+	 *
+	 * @return エンティティのリスト
+	 */
+	public List<MUsersRoleDto> findVisibleOrderById() {
+
+		List<MUsers> mUsers =
+				select()
+						.leftOuterJoin(MUsersRoleList())
+						.where(new SimpleWhere()
+								.eq(visibleFlag(), true))
+						.orderBy(asc(userId()))
+						.getResultList();
+
+		List<MUsersRoleDto> usersRoleDtos = new ArrayList<>();
+
+		for (MUsers mUser : mUsers) {
+			MUsersRoleDto usersRoleDto = Beans.createAndCopy(MUsersRoleDto.class, mUser).execute();
+
+			if (mUser.MUsersRoleList.size() > 0) {
+				usersRoleDto.roleId = mUser.MUsersRoleList.get(0).roleId;
+			}
+
+			usersRoleDtos.add(usersRoleDto);
+		}
+
+		return usersRoleDtos;
+	}
+
+	/**
+	 * 識別子を条件に削除します。
+	 *
+	 * @param userId
+	 * @return 削除件数
+	 */
+	public int deleteById(String userId) {
+		return jdbcManager
+				.updateBySql("DELETE FROM m_users WHERE user_id=?", String.class)
+				.params(userId)
+				.execute();
+	}
+
+	/**
+	 * ユーザ情報を取得します。
+	 *
+	 * @param userId
+	 * @param password
+	 * @return ユーザ情報
+	 */
+	public MUsers findByUserId(String userId, String password) {
+
+		return jdbcManager
+				.from(MUsers.class)
+				.where(new SimpleWhere()
+						.eq(userId(), userId)
+						.eq(userPassword(), password))
+				.getSingleResult();
+	}
+
+	/**
+	 * 認証します。
+	 *
+	 * @param userId
+	 * @param password
+	 * @return 認証結果
+	 */
+	public boolean isAuth(String userId, String password) {
+
+		MUsers mUsers = findByUserId(userId, password);
+
+		return (mUsers != null);
+	}
+}

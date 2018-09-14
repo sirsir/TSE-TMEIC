@@ -1,0 +1,96 @@
+<%-- コピーダイアログ --%>
+<script type="text/javascript">
+function productCopy() {
+
+  var rowId = productGrid.selrow();
+
+  if (rowId == null) {
+    dialogUtils.alert("<bean:message key='errors.not.select'/>");
+    return false;
+  }
+
+  $(productGrid.gridId).jqGrid('restoreRow', rowId);
+
+  $("#srcProductCode").text($(productGrid.gridId).getCell(rowId, "partNo"));
+  $("#srcProductName").text($(productGrid.gridId).getCell(rowId, "partName"));
+
+  var dialogProp = dialogUtils.defaultProp();
+  dialogProp.title = "<bean:message key="copy"/>";
+  dialogProp.minWidth = 320;
+  dialogProp.minHeight = 250;
+  dialogProp.buttons = [
+                         { text: '<bean:message key="register"/>',
+                           click: function() {
+                             doCopy();
+                           }
+                         },
+                         { text: '<bean:message key="cancel"/>',
+                           click: function() { $("#productCopyDialog").dialog("close"); }
+                         }
+                       ];
+
+  $("#productCopyDialog").dialog(dialogProp);
+}
+
+function doCopy() {
+
+  if ($("#destProductCode").val() == "" || $("#destProductName").val() == "") {
+    dialogUtils.alert("<bean:message key="errors.copy.required"/>");
+    return false;
+  }
+
+  $.ajax({
+    url: "${f:url('//master/product/copy/')}",
+    async: false,
+    type: "POST",
+    data: {
+           srcProductCode  : $("#srcProductCode").text(),
+           destProductCode : $("#destProductCode").val(),
+           destProductName : $("#destProductName").val()
+    },
+    dataType: "jsonp",
+    success: function(data) {
+
+      if (data.result == "OK") {
+        doSearch();
+        $("#productCopyDialog").dialog("close");
+
+      } else if (data.result == "NG") {
+          dialogUtils.alert(data.message);
+      }
+    }
+  });
+}
+</script>
+
+<div id="productCopyDialog" style="display: none;">
+  <div style="padding-bottom: 10px;"></div>
+  <img src="${f:url('/img/square.png')}" style="width: 10px;">
+  <bean:message key="copy.source"/>
+
+  <table class="ordinaryTable" style="margin-top: 5px;">
+    <tr>
+      <td style="width: 100px;">
+        <span id="srcProductCode">${f:nbsp(' ')}</span>
+      </td>
+      <td style="width: 100px;">
+        <span id="srcProductName">${f:nbsp(' ')}</span>
+      </td>
+    </tr>
+  </table>
+
+  <div style="padding-bottom: 30px;"></div>
+  <img src="${f:url('/img/square.png')}" style="width: 10px;">
+  <bean:message key="copy.destination"/>
+
+  <table style="margin-top: 5px;">
+    <tr>
+      <td style="width: 120px;"><bean:message key="part.no"/></td>
+      <td style="width: 200px;"><input type="text" id="destProductCode" maxlength="15" style="width: 200px;" /></td>
+    </tr>
+    <tr>
+      <td style="width: 120px;"><bean:message key="part.name"/></td>
+      <td style="width: 200px;"><input type="text" id="destProductName" maxlength="30" style="width: 200px;" /></td>
+    </tr>
+  </table>
+</div>

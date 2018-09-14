@@ -1,0 +1,66 @@
+package jp.co.tmeic.mespd.service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import jp.co.tmeic.mespd.dto.handy.SpecDto;
+
+import org.seasar.extension.jdbc.JdbcManager;
+
+/**
+ * MaterialPlanのサービスクラスです。
+ *
+ */
+public class SpecPlanService {
+
+	@Resource
+	protected JdbcManager jdbcManager;
+
+	/**
+	 * 工程の仕様計画・実績を取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @return
+	 */
+	public List<SpecDto> findSpecProcessBySerialNo(String productPlanNo, Integer processComponentNo) {
+
+		Map<String, Object> param = new HashMap<>();
+		param.put("productPlanNo", productPlanNo);
+		param.put("processComponentNo", processComponentNo);
+
+		return jdbcManager.selectBySqlFile(
+				SpecDto.class,
+				"jp/co/tmeic/mespd/service/SpecPlanService_findSpecProcessBySerialNo.sql",
+				param)
+				.getResultList();
+	}
+
+	/**
+	 * 製品の仕様計画・実績を取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @param revision
+	 * @return
+	 */
+	public List<SpecDto> findSpecProductBySerialNo(
+			String productPlanNo, Integer processComponentNo, String serialNo, Integer revision) {
+
+		Map<String, Object> param = new HashMap<>();
+		param.put("productPlanNo", productPlanNo);
+		param.put("processComponentNo", processComponentNo);
+		param.put("serialNo", serialNo);
+		param.put("revision", revision);
+
+		return jdbcManager.selectBySqlFile(
+				SpecDto.class,
+				"jp/co/tmeic/mespd/service/SpecPlanService_findSpecProductBySerialNo.sql",
+				param)
+				.getResultList();
+	}
+}

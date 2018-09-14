@@ -1,0 +1,58 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+MESPdControl
+</name>
+</assembly>
+<members>
+<member name="F:MESPdControl.CfLabel._UseMnemonic">
+	<summary>UseMnemonic</summary>
+</member><member name="M:MESPdControl.CfLabel.TextEscape(System.String)">
+	<summary>
+ Escape of text properties
+ </summary>
+	<param name="text"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdControl.CfLabel.TextUnescape(System.String)">
+	<summary>
+ Unescape of text properties
+ </summary>
+	<param name="text"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="F:MESPdControl.CfButton._UseMnemonic">
+	<summary>UseMnemonic</summary>
+</member><member name="F:MESPdControl.CfButton._Highlight">
+	<summary>Highlight</summary>
+</member><member name="M:MESPdControl.CfButton.TextEscape(System.String)">
+	<summary>
+ Escape of text properties
+ </summary>
+	<param name="text"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MESPdControl.CfButton.TextUnescape(System.String)">
+	<summary>
+ Unescape of text properties
+ </summary>
+	<param name="text"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="P:MESPdControl.My.Resources.Resources.ResourceManager">
+	<summary>
+   Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:MESPdControl.My.Resources.Resources.Culture">
+	<summary>
+   Overrides the current thread's CurrentUICulture property for all
+   resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="T:MESPdControl.My.Resources.Resources">
+	<summary>
+   A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+</members>
+</doc>

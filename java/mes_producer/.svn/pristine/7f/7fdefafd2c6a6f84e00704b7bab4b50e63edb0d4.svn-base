@@ -1,0 +1,65 @@
+<JOB>
+<OBJECT id="Fso" progid="Scripting.FileSystemObject" />
+<OBJECT id="ExcelApp" progid="Excel.Application" />
+<!-- Excel guid -->
+<REFERENCE guid="00020813-0000-0000-C000-000000000046" />
+<SCRIPT language="VBScript" src="./log.vbs"></script>
+<SCRIPT language="VBScript">
+' get this script file path without filename
+scriptPath = Replace(WScript.ScriptFullName,WScript.ScriptName,"")
+logFilePath = scriptPath & "\ExcelToPdf.log"
+
+on error resume next
+if Fso.FileExists(logFilePath) = True Then
+   Fso.DeleteFile logFilePath, True
+end if
+on error goto 0
+SetLogFilePath logFilePath
+
+Dim objNamed
+Set objNamed = WScript.Arguments.Named
+
+Dim srcFile : srcFile = objNamed.Item("src")
+Dim distFile : distFile = objNamed.Item("dist")
+
+AddLog "srcFile:" & srcFile
+AddLog "distFile:" & distFile
+
+Dim MyBook
+
+on error resume next
+Set MyBook = ExcelApp.Workbooks.Open(srcFile)
+AddLog "Open Workbooks"
+
+if Err.Number <> 0 then
+    Set MyBook = Nothing
+	ExcelApp.Quit()
+    AddLog "Open Error"
+    AddLog "Err.Number:" & Err.Number
+    AddLog "Err.Description:" & Err.Description
+	Wscript.Quit()
+end if
+
+Call MyBook.ExportAsFixedFormat(xlTypePDF, distFile)
+AddLog "Export pdf"
+
+if Err.Number <> 0 then
+    Set MyBook = Nothing
+	ExcelApp.Quit()
+    AddLog "Convert Error"
+    AddLog "Err.Number:" & Err.Number
+    AddLog "Err.Description:" & Err.Description
+	Wscript.Quit()
+end if
+on error goto 0
+
+AddLog "Complete"
+
+Set MyBook = Nothing
+
+ExcelApp.Quit()
+
+WScript.Quit()
+
+</SCRIPT>
+</JOB>

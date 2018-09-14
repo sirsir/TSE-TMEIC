@@ -1,0 +1,34 @@
+package jp.co.tmeic.mespd.dto.jqgrid.product;
+
+import jp.co.tmeic.mespd.dto.jqgrid.JqgridDto;
+
+/**
+ * 出荷
+ *
+ */
+public class DShippingDto extends JqgridDto {
+
+	/** 出荷No */
+	public String shippingNo;
+
+	/** 出荷の日付 */
+	public String shippingDate;
+
+	/** 部分的な数 */
+	public String partNo;
+
+	/** 部分的な名前 */
+	public String partName;
+
+	/** 顧客名 */
+	public String customerName;
+
+	/** モデル */
+	public String model;
+
+	/** 予定数量 */
+	public String planQty;
+
+	/** 結果量 */
+	public String resultQty;
+}

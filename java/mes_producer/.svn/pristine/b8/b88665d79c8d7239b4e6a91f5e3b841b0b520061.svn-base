@@ -1,0 +1,154 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package jp.co.tmeic.mespd.action.handy;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import jp.co.tmeic.mespd.entity.MUsers;
+import jp.co.tmeic.mespd.service.MUsersService;
+import jp.co.tmeic.mespd.utils.JSONUtil;
+import jp.co.tmeic.mespd.utils.SystemParameterUtil;
+import net.arnx.jsonic.JSON;
+
+import org.apache.log4j.Logger;
+import org.seasar.extension.jdbc.JdbcManager;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.util.ResponseUtil;
+
+public class LoginAction {
+
+	/** Logger */
+	private Logger logger = Logger.getLogger(getClass());
+
+	/** request */
+	@Resource
+	protected HttpServletRequest request;
+
+	/** response */
+	@Resource
+	protected HttpServletResponse response;
+
+	/** session */
+	@Resource
+	protected HttpSession session;
+
+	@Resource
+	protected JdbcManager jdbcManager;
+
+	@Resource
+	protected MUsersService mUsersService;
+
+	/** ユーザ認証 */
+	@Execute(validator = false)
+	public String login() {
+
+		Map<String, String> json = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			String userCode = request.getParameter("userCode");
+			String password = request.getParameter("password");
+
+			boolean isAuth = false;
+
+			if (SystemParameterUtil.passwordRequired()) {
+				isAuth = mUsersService.isAuth(userCode, password);
+			} else {
+				isAuth = mUsersService.isAuth(userCode, null);
+			}
+
+			if (isAuth) {
+				json.put("result", "OK");
+			} else {
+				json.put("result", "NG");
+			}
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+	@Execute(validator = false)
+	public String userInfo() {
+
+		Map<String, String> json = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			String userCode = request.getParameter("userCode");
+			String password = request.getParameter("password");
+
+			MUsers mUsers = null;
+
+			if (SystemParameterUtil.passwordRequired()) {
+				mUsers = mUsersService.findByUserId(userCode, password);
+			} else {
+				mUsers = mUsersService.findByUserId(userCode, null);
+			}
+
+			json.put("result", "OK");
+
+			JSON userJson = new JSON();
+			userJson.setSuppressNull(true);
+
+			json.put("userInfo", userJson.format(mUsers));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+	/** パスワード必須確認 */
+	@Execute(validator = false)
+	public String passwordRequired() {
+
+		Map<String, String> json = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			json.put("result", "OK");
+			json.put("required", String.valueOf(SystemParameterUtil.passwordRequired()));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+}

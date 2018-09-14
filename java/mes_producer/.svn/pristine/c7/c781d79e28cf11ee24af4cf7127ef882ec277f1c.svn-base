@@ -1,0 +1,505 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package jp.co.tmeic.mespd.action.handy;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import jp.co.tmeic.mespd.constant.ProcessProductStatus;
+import jp.co.tmeic.mespd.dto.handy.SpecDto;
+import jp.co.tmeic.mespd.entity.DProcessPlan;
+import jp.co.tmeic.mespd.entity.DProductPlan;
+import jp.co.tmeic.mespd.entity.DSpecProcessResult;
+import jp.co.tmeic.mespd.entity.MProcess;
+import jp.co.tmeic.mespd.entity.MProcessComponent;
+import jp.co.tmeic.mespd.service.DProcessPlanService;
+import jp.co.tmeic.mespd.service.DProcessProductResultService;
+import jp.co.tmeic.mespd.service.DProcessResultService;
+import jp.co.tmeic.mespd.service.DProductPlanService;
+import jp.co.tmeic.mespd.service.DSpecProcessResultService;
+import jp.co.tmeic.mespd.service.MProcessService;
+import jp.co.tmeic.mespd.service.ProcessResultService;
+import jp.co.tmeic.mespd.service.SpecPlanService;
+import jp.co.tmeic.mespd.utils.JSONUtil;
+import net.arnx.jsonic.JSON;
+import net.arnx.jsonic.TypeReference;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.log4j.Logger;
+import org.seasar.extension.jdbc.JdbcManager;
+import org.seasar.framework.util.IntegerConversionUtil;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.util.ResponseUtil;
+
+public class ProcessAction {
+
+	/** Logger */
+	private Logger logger = Logger.getLogger(getClass());
+
+	/** request */
+	@Resource
+	protected HttpServletRequest request;
+
+	/** response */
+	@Resource
+	protected HttpServletResponse response;
+
+	/** session */
+	@Resource
+	protected HttpSession session;
+
+	@Resource
+	protected JdbcManager jdbcManager;
+
+	@Resource
+	protected DProductPlanService dProductPlanService;
+
+	@Resource
+	protected DProcessPlanService dProcessPlanService;
+	
+	@Resource
+	protected MProcessService mProcessService;
+
+	@Resource
+	protected DProcessResultService dProcessResultService;
+
+	@Resource
+	protected DProcessProductResultService dProcessProductResultService;
+
+	@Resource
+	protected DSpecProcessResultService dSpecProcessResultService;
+
+	@Resource
+	protected ProcessResultService processResultService;
+
+	@Resource
+	protected SpecPlanService specPlanService;
+
+	/** 工程情報 取得 */
+	@Execute(validator = false)
+	public String processInfo() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+
+			Map<String, Object> dProcessPlanMap = getProcessInfo(productPlanNo, processComponentNo);
+			
+			
+			responseData.put("result", "OK");
+			responseData.put("processInfo", JSONUtil.encode(dProcessPlanMap));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+	
+	
+	@Execute(validator = false)
+	public String processAllHandy() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			//final String productPlanNo = request.getParameter("productPlanNo");
+			//final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+
+			//Map<String, Object> dProcessPlanMap = findAllHandyProcess();
+			
+			//List<DProcessPlan> dProcessPlans = dProcessPlanService.findAllHandyProcess();
+			List<MProcess> dProcessPlans = mProcessService.findAllHandyProcess();
+			
+			//List<Map<String, Object>> fields = processFieldData(dProcessPlans);
+			
+			//productResultInputForm.processResultJson = JSONUtil.encode(JqgridUtil.initMap(fields));
+
+			responseData.put("result", "OK");
+			//responseData.put("processInfo", JSONUtil.encode(dProcessPlanMap));
+			responseData.put("processInfo", JSONUtil.encode(dProcessPlans));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+	
+	
+	@Execute(validator = false)
+	public String processInfoByName() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+			
+			String processName = request.getParameter("processName");
+
+			//final String productPlanNo = request.getParameter("productPlanNo");
+			//final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+
+			//Map<String, Object> dProcessPlanMap = findAllHandyProcess();
+			
+			//List<DProcessPlan> dProcessPlans = dProcessPlanService.findAllHandyProcess();
+			MProcess dProcessPlans = mProcessService.findByProcessName(processName);
+			//MProcessComponent dProcessPlans = dProcessPlanService.findByProcessName(processName);
+			//DProcessPlan dProcessPlan = dProcessPlanService.findByProcessComponentNo(productPlanNo, processComponentNo);
+			
+			//List<Map<String, Object>> fields = processFieldData(dProcessPlans);
+			
+			//productResultInputForm.processResultJson = JSONUtil.encode(JqgridUtil.initMap(fields));
+
+			responseData.put("result", "OK");
+			responseData.put("processInfo", JSONUtil.encode(dProcessPlans));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+	
+
+	/** 工程情報 取得 */
+	@Execute(validator = false)
+	public String processInfoByBarcodeOLDDDDDDDDDDDD() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			String barcode = request.getParameter("barcode");
+
+			final String productPlanNo = StringUtils.trim(StringUtils.substring(barcode, 0, 12));
+			final Integer processComponentNo = IntegerConversionUtil.toInteger(StringUtils.substring(barcode, 12, 14));
+
+			Map<String, Object> dProcessPlanMap = getProcessInfo(productPlanNo, processComponentNo);
+
+			responseData.put("result", "OK");
+			responseData.put("processInfo", JSONUtil.encode(dProcessPlanMap));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 工程情報 取得 */
+	@Execute(validator = false)
+	public String processInfoByBarcode() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			String barcode = request.getParameter("barcode");
+			String selected_process = request.getParameter("selected_process");
+			
+			
+
+			//final String productPlanNo = StringUtils.trim(StringUtils.substring(barcode, 0, 12));
+			String productPlanNo = jdbcManager.selectBySql(
+					String.class,
+					"select max( product_plan_no) from v_d_barcode_association where barcode_no = ?",
+					barcode).getSingleResult();
+			
+			String serialNo = jdbcManager.selectBySql(
+					String.class,
+					"select serial_no from v_d_barcode_association where barcode_no =? and product_plan_no =(select max( product_plan_no) from v_d_barcode_association where barcode_no =?)",
+					barcode,barcode).getSingleResult();
+			
+			String partNo = jdbcManager.selectBySql(
+					String.class,
+					"select part_no from d_product_plan where product_plan_no = ?",
+					productPlanNo).getSingleResult();
+			
+			String processId = jdbcManager.selectBySql(
+					String.class,
+					"select process_id from m_process where process_name = ?",
+					selected_process).getSingleResult();
+			
+			
+			Integer selectedProcessComponentNo= jdbcManager.selectBySql(
+					Integer.class,
+					"select process_component_no from m_process_component where part_no = ? and process_id = ?",
+					partNo,processId).getSingleResult();
+			
+			
+			
+			Integer processComponentNo = jdbcManager.selectBySql(
+					Integer.class,
+					"select max(process_component_no) from d_process_product_result where product_plan_no =? and serial_no =?",
+					productPlanNo,serialNo).getSingleResult();
+			
+			Integer status = jdbcManager.selectBySql(
+					Integer.class,
+					"select status from d_process_product_result where product_plan_no =? and serial_no =? and process_component_no=? and revision = (select max(revision) from d_process_product_result where product_plan_no =? and serial_no =? and process_component_no=?)",
+					productPlanNo,serialNo,processComponentNo,productPlanNo,serialNo,processComponentNo).getSingleResult();
+			
+			
+		
+			 if (processComponentNo < selectedProcessComponentNo-1) {
+			        throw new Exception();
+			    }else if(processComponentNo == selectedProcessComponentNo-1 &&  status <2 ) {
+			    	 throw new Exception();
+			    	
+			    }
+			 
+			 if (processComponentNo == selectedProcessComponentNo-1 &&  status==2){
+				 status = -1;
+				 
+			 }
+			
+			
+			
+			
+			//final Integer processComponentNo = IntegerConversionUtil.toInteger(StringUtils.substring(barcode, 12, 14));
+
+			Map<String, Object> dProcessPlanMap = getProcessInfo(productPlanNo, processComponentNo);
+			
+			
+			
+			
+			dProcessPlanMap.put("status", status);
+			dProcessPlanMap.put("barcode", barcode);
+			dProcessPlanMap.put("serialNo", serialNo);
+			
+			//System.out.print("--------------------------------------------" );
+			//System.out.print(status);
+			//System.out.print(dProcessPlanMap.status);
+			
+
+			responseData.put("result", "OK");
+			responseData.put("processInfo", JSONUtil.encode(dProcessPlanMap));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/**
+	 * 工程情報取得
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @return
+	 */
+	private Map<String, Object> getProcessInfo(String productPlanNo, Integer processComponentNo) {
+
+		DProcessPlan dProcessPlan = dProcessPlanService.findByProcessComponentNo(productPlanNo, processComponentNo);
+
+		Map<String, Object> dProcessPlanMap = new HashMap<>();
+		DProductPlan dProductPlan = dProductPlanService.findById(productPlanNo);
+
+		long resultQty = 0;
+		int status = ProcessProductStatus.NONE;
+		//System.out.print("--------------------------------------------" );
+		//System.out.print(status);
+
+		if (dProcessPlan.DProcessResult != null) {
+			resultQty = (dProcessPlan.DProcessResult.resultQty == null ? 0 : dProcessPlan.DProcessResult.resultQty);
+			status = dProcessPlan.DProcessResult.status;
+		}
+		
+		
+
+		dProcessPlanMap.put("productPlanNo", dProcessPlan.productPlanNo);
+		dProcessPlanMap.put("productName", dProcessPlan.DProductPlan.partName);
+		dProcessPlanMap.put("processComponentNo", dProcessPlan.processComponentNo);
+		dProcessPlanMap.put("ProcessName", dProcessPlan.processName);
+		dProcessPlanMap.put("status", status);
+		dProcessPlanMap.put("planQty", dProductPlan.planQty);
+		dProcessPlanMap.put("resultQty", resultQty);
+
+		return dProcessPlanMap;
+	}
+
+	/** 工程仕様情報 取得 */
+	@Execute(validator = false)
+	public String specInfo() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+
+			List<SpecDto> specDtos = specPlanService.findSpecProcessBySerialNo(productPlanNo, processComponentNo);
+			
+			
+			
+
+			responseData.put("result", "OK");
+			responseData.put("specInfo", JSONUtil.encode(specDtos));
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 仕様実績登録 取得 */
+	@Execute(validator = false)
+	public String specRegister() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+
+			List<DSpecProcessResult> dSpecProcessResults =
+					JSON.decode(request.getParameter("specs"),
+							new TypeReference<List<DSpecProcessResult>>() {
+							});
+
+			for (DSpecProcessResult dSpecProcessResult : dSpecProcessResults) {
+
+				DSpecProcessResult dSpecProcessResultTmp =
+						dSpecProcessResultService.findById(productPlanNo, processComponentNo, dSpecProcessResult.specComponentNo);
+
+				boolean isNewRow = false;
+
+				if (dSpecProcessResultTmp == null) {
+
+					isNewRow = true;
+
+					dSpecProcessResultTmp = new DSpecProcessResult();
+
+					dSpecProcessResultTmp.productPlanNo = productPlanNo;
+					dSpecProcessResultTmp.processComponentNo = processComponentNo;
+					dSpecProcessResultTmp.specComponentNo = dSpecProcessResult.specComponentNo;
+				}
+
+				dSpecProcessResultTmp.inputValue = dSpecProcessResult.inputValue;
+
+				if (isNewRow) {
+					dSpecProcessResultService.insert(dSpecProcessResultTmp);
+				} else {
+					dSpecProcessResultService.update(dSpecProcessResultTmp);
+				}
+			}
+
+			responseData.put("result", "OK");
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 工程着工 */
+	@Execute(validator = false)
+	public String processWorkStart() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+
+			boolean isStart = processResultService.processStart(productPlanNo, processComponentNo);
+
+			responseData.put("result", "OK");
+			responseData.put("isStart", isStart);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+
+	/** 工程完了 */
+	@Execute(validator = false)
+	public String processWorkFinish() {
+
+		Map<String, Object> responseData = new HashMap<>();
+
+		try {
+			response.setContentType("application/json; charset=utf-8");
+
+			final String productPlanNo = request.getParameter("productPlanNo");
+			final Integer processComponentNo = NumberUtils.toInt(request.getParameter("processComponentNo"));
+
+			boolean isComplet = processResultService.processComplet(productPlanNo, processComponentNo);
+
+			responseData.put("result", "OK");
+			responseData.put("isComplet", isComplet);
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			responseData.put("result", "NG");
+		} finally {
+			ResponseUtil.write(JSONUtil.encode(responseData));
+		}
+
+		return null;
+	}
+}

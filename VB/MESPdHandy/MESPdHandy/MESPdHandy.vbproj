@@ -1,0 +1,395 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9FDB25A0-7403-452B-9C0C-A607FC03F54D}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>MESPdHandy.frmInit</StartupObject>
+    <RootNamespace>MESPdHandy</RootNamespace>
+    <AssemblyName>MESPdHandy</AssemblyName>
+    <ProjectTypeGuids>{68B1623D-7FB9-47D8-8664-7ECEA3297D4F};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
+    <PlatformFamilyName>WindowsCE</PlatformFamilyName>
+    <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
+    <OSVersion>5.0</OSVersion>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <DeployDirSuffix>\FlashDisk\MESPdHandy</DeployDirSuffix>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <NativePlatformName>Windows CE</NativePlatformName>
+    <FormFactorID>
+    </FormFactorID>
+    <DeployDirPrefix>\</DeployDirPrefix>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>$(PlatformFamilyName)=TRUE</DefineConstants>
+    <DocumentationFile>MESPdHandy.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <FileAlignment>512</FileAlignment>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <CodeAnalysisRules>-Microsoft.Security#CA2109;-Microsoft.Design#CA1031;-Microsoft.Design#CA1051;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1707</CodeAnalysisRules>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>$(PlatformFamilyName)=TRUE</DefineConstants>
+    <DocumentationFile>MESPdHandy.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <FileAlignment>512</FileAlignment>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ImagerLibNet, Version=2.1.1.6336, Culture=neutral, PublicKeyToken=4079e79a5891f674">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\ImagerLibNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json.Compact, Version=3.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\Newtonsoft.Json.Compact.dll</HintPath>
+    </Reference>
+    <Reference Include="OBReadLibNet, Version=2.1.1.6336, Culture=neutral, PublicKeyToken=4079e79a5891f674">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\OBReadLibNet.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Data" />
+    <Reference Include="SystemLibnet, Version=2.1.1.6336, Culture=neutral, PublicKeyToken=4079e79a5891f674">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\SystemLibnet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class\AppData.vb" />
+    <Compile Include="Class\Constant\ProcessStatus.vb" />
+    <Compile Include="Class\Constant\ProcessProductStatus.vb" />
+    <Compile Include="Class\Constant\SpecAttributeId.vb" />
+    <Compile Include="Class\Dto\WorkInfo.vb" />
+    <Compile Include="Class\Dto\ProcessSelection.vb" />
+    <Compile Include="Class\Dto\ProcessInfo.vb" />
+    <Compile Include="Class\Dto\UserInfo.vb" />
+    <Compile Include="Class\Dto\MaterialInfo.vb" />
+    <Compile Include="Class\Dto\SpecInfo.vb" />
+    <Compile Include="Class\Dto\ProductInfo.vb" />
+    <Compile Include="Class\Dto\SerialNoInfo.vb" />
+    <Compile Include="Class\Dto\DisplayOrder.vb" />
+    <Compile Include="Class\Exception\MesPdException.vb" />
+    <Compile Include="Class\Exception\CodeScanException.vb" />
+    <Compile Include="Class\Scan\ScanImg.vb" />
+    <Compile Include="Class\Scan\ScanCodeFactory.vb" />
+    <Compile Include="Class\Scan\ScanLaser.vb" />
+    <Compile Include="Class\Service\ProcessService.vb" />
+    <Compile Include="Class\Service\UserService.vb" />
+    <Compile Include="Class\Service\ProductService.vb" />
+    <Compile Include="Class\Service\Utils\CfUtils.vb" />
+    <Compile Include="Class\Service\Utils\HttpUtils.vb" />
+    <Compile Include="Class\Service\Utils\MsgBoxUtils.vb" />
+    <Compile Include="Class\Service\Utils\DtxUtils.vb" />
+    <Compile Include="Class\Service\Utils\NumberUtils.vb" />
+    <Compile Include="Class\Service\Utils\BooleanUtils.vb" />
+    <Compile Include="Class\Service\Utils\DisplayOrderUtils.vb" />
+    <Compile Include="Class\Service\Utils\SpecFormUtils.vb" />
+    <Compile Include="Class\Service\Utils\StringUtils.vb" />
+    <Compile Include="Form\Base\frmBase.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\Base\frmBase.Designer.vb">
+      <DependentUpon>frmBase.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmInputWork.Designer.vb">
+      <DependentUpon>frmInputWork.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmInputWork.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmLogin.Designer.vb">
+      <DependentUpon>frmLogin.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmLogin.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmProcessRead.Designer.vb">
+      <DependentUpon>frmProcessRead.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmProcessRead.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmResultInput.Designer.vb">
+      <DependentUpon>frmResultInput.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmResultInput.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmResultInputProduct.Designer.vb">
+      <DependentUpon>frmResultInputProduct.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmResultInputProduct.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmSpecInput.Designer.vb">
+      <DependentUpon>frmSpecInput.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmSpecInput.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmSpecSelect.Designer.vb">
+      <DependentUpon>frmSpecSelect.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmSpecSelect.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmSpecButton.Designer.vb">
+      <DependentUpon>frmSpecButton.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmSpecButton.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmMaterialRead.Designer.vb">
+      <DependentUpon>frmMaterialRead.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmMaterialRead.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmMaterialInput.Designer.vb">
+      <DependentUpon>frmMaterialInput.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmMaterialInput.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\frmInit.Designer.vb">
+      <DependentUpon>frmInit.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\frmInit.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\Base\frmSpec.Designer.vb">
+      <DependentUpon>frmSpec.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\Base\frmSpec.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\Base\frmMaterial.Designer.vb">
+      <DependentUpon>frmMaterial.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\Base\frmMaterial.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\Base\frmSerial.Designer.vb">
+      <DependentUpon>frmSerial.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form\Base\frmSerial.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Interface\ScanCodeImpl.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.ja.Designer.vb">
+      <DependentUpon>Resources.ja.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Form\Base\frmBase.ja.resx">
+      <DependentUpon>frmBase.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\Base\frmBase.resx">
+      <DependentUpon>frmBase.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmInputWork.ja.resx">
+      <DependentUpon>frmInputWork.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmInputWork.resx">
+      <DependentUpon>frmInputWork.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmLogin.ja.resx">
+      <DependentUpon>frmLogin.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmLogin.resx">
+      <DependentUpon>frmLogin.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmProcessRead.ja.resx">
+      <DependentUpon>frmProcessRead.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmProcessRead.resx">
+      <DependentUpon>frmProcessRead.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmResultInput.ja.resx">
+      <DependentUpon>frmResultInput.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmResultInput.resx">
+      <DependentUpon>frmResultInput.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmResultInputProduct.ja.resx">
+      <DependentUpon>frmResultInputProduct.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmResultInputProduct.resx">
+      <DependentUpon>frmResultInputProduct.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmSpecInput.ja.resx">
+      <DependentUpon>frmSpecInput.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmSpecInput.resx">
+      <DependentUpon>frmSpecInput.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmSpecSelect.ja.resx">
+      <DependentUpon>frmSpecSelect.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmSpecSelect.resx">
+      <DependentUpon>frmSpecSelect.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmSpecButton.ja.resx">
+      <DependentUpon>frmSpecButton.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmSpecButton.resx">
+      <DependentUpon>frmSpecButton.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmMaterialRead.ja.resx">
+      <DependentUpon>frmMaterialRead.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmMaterialRead.resx">
+      <DependentUpon>frmMaterialRead.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmMaterialInput.ja.resx">
+      <DependentUpon>frmMaterialInput.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmMaterialInput.resx">
+      <DependentUpon>frmMaterialInput.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\frmInit.resx">
+      <DependentUpon>frmInit.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\Base\frmSpec.ja.resx">
+      <DependentUpon>frmSpec.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\Base\frmSpec.resx">
+      <DependentUpon>frmSpec.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\Base\frmMaterial.ja.resx">
+      <DependentUpon>frmMaterial.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\Base\frmMaterial.resx">
+      <DependentUpon>frmMaterial.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\Base\frmSerial.ja.resx">
+      <DependentUpon>frmSerial.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\Base\frmSerial.resx">
+      <DependentUpon>frmSerial.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.ja.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.ja.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="DesignTimeAttributes1.xmta" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\WebUrl.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MESPdControl\MESPdControl.vbproj">
+      <Project>{E04CA928-FD4C-4C9D-B3AD-A442FBBE3464}</Project>
+      <Name>MESPdControl</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Lib\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.VisualBasic.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{F184B08F-C81C-45F6-A57F-5ABD9991F28F}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

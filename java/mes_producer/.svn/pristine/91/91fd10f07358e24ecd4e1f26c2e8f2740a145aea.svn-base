@@ -1,0 +1,360 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package jp.co.tmeic.mespd.action.product;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+
+import jp.co.tmeic.mespd.action.AbstractAction;
+import jp.co.tmeic.mespd.constant.NoNumberingMethod;
+import jp.co.tmeic.mespd.constant.ProductStatus;
+import jp.co.tmeic.mespd.dto.jqgrid.product.DProductPlanDto;
+import jp.co.tmeic.mespd.entity.DProductPlan;
+import jp.co.tmeic.mespd.entity.MProduct;
+import jp.co.tmeic.mespd.exception.ValidationException;
+import jp.co.tmeic.mespd.form.product.ProductPlanForm;
+import jp.co.tmeic.mespd.service.DProductPlanService;
+import jp.co.tmeic.mespd.service.MProductService;
+import jp.co.tmeic.mespd.service.ProductPlanService;
+import jp.co.tmeic.mespd.utils.BrowserMsg;
+import jp.co.tmeic.mespd.utils.DateUtil;
+import jp.co.tmeic.mespd.utils.JSONUtil;
+import jp.co.tmeic.mespd.utils.JqgridUtil;
+import jp.co.tmeic.mespd.utils.JqueryUtil;
+import jp.co.tmeic.mespd.utils.SystemParameterUtil;
+import jp.co.tmeic.mespd.utils.TimeUtil;
+import jp.co.tmeic.mespd.utils.TimestampUtil;
+import jp.co.tmeic.mespd.utils.ValidateUtil;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.log4j.Logger;
+import org.seasar.framework.beans.util.Beans;
+import org.seasar.sastruts.example.annotation.Auth;
+import org.seasar.struts.annotation.ActionForm;
+import org.seasar.struts.annotation.Execute;
+import org.seasar.struts.util.MessageResourcesUtil;
+
+@Auth(authorityId = "operation")
+public class ProductPlanAction extends AbstractAction {
+
+	/** Logger */
+	private Logger logger = Logger.getLogger(getClass());
+
+	/** UserTransaction */
+	public UserTransaction userTransaction;
+
+	/** ActionForm */
+	@Resource
+	@ActionForm
+	protected ProductPlanForm productPlanForm;
+
+	@Resource
+	protected MProductService mProductService;
+
+	@Resource
+	protected DProductPlanService dProductPlanService;
+
+	@Resource
+	protected ProductPlanService productPlanService;
+
+	/** 製造計画検索 */
+	@Execute(validator = false)
+	public String index() {
+
+		try {
+
+			indexInitFrom(productPlanForm);
+			indexValidate(productPlanForm);
+
+			Date startDate = DateUtil.toDate(productPlanForm.displayStartDate);
+			Date endDate = DateUtil.toDate(productPlanForm.displayEndDate);
+
+			List<DProductPlanDto> dProductPlanDtos = productPlanService.findByManufactureDate(startDate, endDate);
+
+			productPlanForm.productPlanJson = JSONUtil.encode(JqgridUtil.init(dProductPlanDtos));
+
+			} catch (ValidationException ex) {
+
+			productPlanForm.productPlanJson = "[]";
+
+			BrowserMsg.toAlert(ex.getMessage());
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+		}
+
+		return "index.jsp";
+	}
+
+	/**
+	 * フォーム初期化
+	 *
+	 * @param form
+	 */
+	private void indexInitFrom(ProductPlanForm form) {
+
+		form.planQtyMaxLength = String.valueOf(SystemParameterUtil.productQuantityMaxLength());
+		form.planNoNumberingMethod = String.valueOf(SystemParameterUtil.productPlanNoNumberingMethod());
+		form.productStatus = ProductStatus.getStatus(locale());
+
+		form.mProducts = mProductService.findAllOrderById();
+
+		// 初回表示は本日
+		if (StringUtils.isBlank(form.displayStartDate)) {
+			form.displayStartDate = DateUtil.now("dd/MM/yyyy");
+		}
+
+		if (StringUtils.isBlank(form.displayEndDate)) {
+			form.displayEndDate = DateUtil.now("dd/MM/yyyy");
+		}
+
+		form.productPlanJson = "[]";
+	}
+
+	/**
+	 * 検索処理が可能か検証を行う。
+	 *
+	 * @param form
+	 */
+	private void indexValidate(ProductPlanForm form) {
+
+		ValidateUtil.date("product.manifacturedate", form.displayStartDate);
+		ValidateUtil.date("product.manifacturedate", form.displayEndDate);
+
+		int displayDays = SystemParameterUtil.productDisplayDays();
+		long days = DateUtil.days(DateUtil.toDate(form.displayStartDate), DateUtil.toDate(form.displayEndDate));
+
+		ValidateUtil.displayLimitDays("product.manifacturedate", displayDays, days);
+	}
+
+	/** 登録 */
+	@Execute(validator = false)
+	public String register() {
+
+		Map<String, String> json = new HashMap<>();
+
+		boolean isCommit = false;
+
+		try {
+			List<DProductPlanDto> dProductPlans = JSONUtil.decode(productPlanForm.productPlanJson, DProductPlanDto[].class);
+
+			registerValidate(dProductPlans);
+			registerExe(dProductPlans);
+
+			json.put("result", "OK");
+
+			isCommit = true;
+
+		} catch (ValidationException ex) {
+			json.put("result", "NG");
+			json.put("message", ex.getMessage());
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+			json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.register"));
+		} finally {
+
+			if (!isCommit) {
+				try {
+					userTransaction.setRollbackOnly();
+				} catch (IllegalStateException | SystemException ex) {
+					logger.error("Exception", ex);
+				}
+			}
+
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+
+	/**
+	 * 登録可能か検証を行う。
+	 *
+	 * @param productPlans
+	 * @throws ParseException
+	 */
+	private void registerValidate(List<DProductPlanDto> productPlans) throws ParseException {
+
+		for (DProductPlanDto productPlan : productPlans) {
+
+			validatePlanNo(productPlan.crud, productPlan.productPlanNo);
+
+			ValidateUtil.required("product.manifacturedate", productPlan.manufactureDate);
+			ValidateUtil.date("product.manifacturedate", productPlan.manufactureDate);
+			
+			Date startDate = DateUtil.toDate(productPlanForm.displayStartDate);
+			Date endDate = DateUtil.toDate(productPlanForm.displayEndDate);
+			
+			Date manufactureDate = DateUtil.toDate(productPlan.manufactureDate);
+		
+			ValidateUtil.outOfRange("product.manifacturedate", startDate, endDate, manufactureDate);
+
+			ValidateUtil.required("part.no", productPlan.partNo);
+			ValidateUtil.maxlength("part.no", productPlan.partNo, 10);
+
+			ValidateUtil.required("plan.qty", productPlan.planQty);
+			ValidateUtil.maxlength("plan.qty", productPlan.planQty, SystemParameterUtil.productQuantityMaxLength());
+			ValidateUtil.minInteger("plan.qty", productPlan.planQty, 0);
+
+			ValidateUtil.required("plan.start.time", productPlan.planStartTime);
+			ValidateUtil.maxlength("plan.start.time", productPlan.planStartTime, 4);
+			ValidateUtil.integer("plan.start.time", productPlan.planStartTime);
+
+			if (!TimeUtil.isTime(productPlan.planStartTime)) {
+				throw new ValidationException(
+						MessageResourcesUtil.getMessage(locale(), "errors.time",
+												MessageResourcesUtil.getMessage(locale(), "plan.start.time")));
+			}
+		}
+	}
+
+	/**
+	 * 検証を行う。
+	 *
+	 * @param crud
+	 * @param productPlanNo
+	 */
+	private void validatePlanNo(String crud, String productPlanNo) {
+
+		int planNoNumberingMethod = SystemParameterUtil.productPlanNoNumberingMethod();
+
+		// 自動採番時は未入力許可
+		boolean isNonCheck =
+				planNoNumberingMethod == NoNumberingMethod.AUTO
+						&& StringUtils.equals(crud, "C")
+						&& StringUtils.isBlank(productPlanNo);
+
+		if (isNonCheck) {
+			return;
+		}
+
+		ValidateUtil.required("plan.no", productPlanNo);
+		ValidateUtil.maxlength("plan.no", productPlanNo, 12);
+		
+		// Noの重複チェック(新規)
+		boolean isProductPlanNoDuplicate = StringUtils.equals(crud, "C") && dProductPlanService.isExist(productPlanNo);
+
+		if (isProductPlanNoDuplicate) {
+			ValidateUtil.duplicate("plan.no");
+		}
+
+		if (!dProductPlanService.isUpdatable(productPlanNo)) {
+			// 生産を開始している場合編集不可
+			throw new ValidationException(MessageResourcesUtil.getMessage(locale(), "errors.editing.disabled"));
+		}
+	}
+
+	/**
+	 * 登録実行
+	 *
+	 * @param productPlans
+	 *            登録製造計画リスト
+	 *
+	 * @throws ParseException
+	 *             異常
+	 */
+	private void registerExe(List<DProductPlanDto> productPlans) throws ParseException {
+
+		for (DProductPlanDto productPlan : productPlans) {
+			
+			DProductPlan dProductPlan = Beans.createAndCopy(DProductPlan.class, productPlan).execute();
+			dProductPlan.manufactureDate = new java.sql.Date(DateUtils.parseDate(productPlan.manufactureDate, "dd/MM/yyyy").getTime());
+			MProduct mProduct = mProductService.findById(dProductPlan.partNo);
+			dProductPlan.partName = mProduct.partName;
+			dProductPlan.customerName = mProduct.customerName;
+			dProductPlan.model = mProduct.model;
+			dProductPlan.productKind = mProduct.productKind;
+
+			Date planStartDate = DateUtil.setTime(dProductPlan.manufactureDate, TimeUtil.toTime(productPlan.planStartTime));
+			dProductPlan.planStartDate = TimestampUtil.toTimestamp(planStartDate);
+
+			// 作成時は終了予定時刻に開始時刻を設定する。
+			dProductPlan.planEndDate = dProductPlan.planStartDate;
+
+			switch (productPlan.crud) {
+				case "C":
+
+					if (StringUtils.isBlank(dProductPlan.productPlanNo)) {
+						dProductPlan.productPlanNo = dProductPlanService.createProductPlanNo(dProductPlan.manufactureDate);
+					}
+
+					dProductPlanService.insert(dProductPlan);
+
+					break;
+
+				case "U":
+					dProductPlanService.update(dProductPlan);
+
+					break;
+			}
+
+			// 終了時刻更新
+			productPlanService.reschedule(dProductPlan.productPlanNo);
+		}
+	}
+
+	/** 削除 */
+	@Execute(validator = false)
+	public String delete() {
+
+		Map<String, String> json = new HashMap<>();
+
+		boolean isCommit = false;
+
+		try {
+			String productPlanNo = request.getParameter("deleteProductPlanNo");
+
+			if (!dProductPlanService.isDeletable(productPlanNo)) {
+				json.put("result", "NG");
+				json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.delete"));
+				return null;
+			}
+
+			dProductPlanService.deleteById(productPlanNo);
+
+			json.put("result", "OK");
+
+			isCommit = true;
+
+		} catch (Exception ex) {
+			logger.error("Exception", ex);
+			json.put("result", "NG");
+			json.put("message", MessageResourcesUtil.getMessage(locale(), "errors.delete"));
+		} finally {
+
+			if (!isCommit) {
+				try {
+					userTransaction.setRollbackOnly();
+				} catch (IllegalStateException | SystemException ex) {
+					logger.error("Exception", ex);
+				}
+			}
+
+			JqueryUtil.callback(JSONUtil.encode(json));
+		}
+
+		return null;
+	}
+}

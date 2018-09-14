@@ -1,0 +1,329 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
+
+<script type="text/javascript">
+
+function createProcessGrid() {
+
+  processGrid.prop;
+
+  processGrid.prop.colNames =
+    [
+      'ID',
+      'CRUD',
+      'process.component.no',
+      '<bean:message key="target"/>',
+      '<bean:message key="process.name"/>',
+      '<bean:message key="plan.quantity.br"/>',
+      '<bean:message key="result.quantity.br"/>',
+      '<bean:message key="inferior.quantity.br"/>',
+      '<bean:message key="result.status"/>',
+      '<bean:message key="process.start"/>',
+      '<bean:message key="start.time"/>',
+      '<bean:message key="process.complete"/>',
+      '<bean:message key="complete.time"/>',
+      <c:forEach var="i" begin="1" end="${processMaterialSize}" step="1">
+      'materialComponentNo',
+      '<bean:message key="name"/>',
+      '<bean:message key="quantity"/>',
+      '<bean:message key="material.unit"/>',
+      </c:forEach>
+      <c:forEach var="i" begin="1" end="${processSpecSize}" step="1">
+      'specComponentNo',
+      'specId',
+      'specAttributeId',
+      'specParts',
+      '<bean:message key="name"/>',
+      '<bean:message key="input.value"/>',
+      </c:forEach>
+      'productResults',
+      'productPlans',
+      'productsMaterialSize',
+      'productsSpecSize',
+    ];
+
+  processGrid.prop.colModel =
+    [
+      { name : 'id', key : true,              hidden : true, frozen : false },
+      { name : 'crud',                        hidden : true, frozen : false },
+      { name : 'processComponentNo',          hidden : true, frozen : false },
+      { name : 'target',                      width :  '40', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false, edittype : 'text',     editrules:{required : false}, formatter: processGrid.radioFmatter},
+      { name : 'processName',                 width : '240', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false},
+      { name : 'planQty',                     width :  '60', align : 'right',  frozen : false, sortable : false, sorttype : 'text', editable : false},
+      { name : 'resultQty',                   width :  '60', align : 'right',  frozen : false, sortable : false, sorttype : 'text', editable : false, edittype : 'text',   editrules:{required : false}, editoptions: {maxlength: ${qtyMaxLength}}},
+      { name : 'inferiorQty',                 width :  '60', align : 'right',  frozen : false, sortable : false, sorttype : 'text', editable : false, edittype : 'text',   editrules:{required : false}, editoptions: {maxlength: ${qtyMaxLength}}},
+      { name : 'status',                      width : '100', align : 'center', frozen : false, sortable : false, sorttype : 'text', editable : false, edittype : 'select', formatter:'select', editoptions:{value : '${f:h(processStatus)}'}, cellattr: processStatusStyleFmatter },
+      { name : 'startInputBtn',               width :  '80', align : 'center', frozen : false, sortable : false, sorttype : 'text', editable : false, formatter: processStatusInputBtnFmatter, formatoptions:{isStart:true }},
+      { name : 'startDatetime',               width : '150', align : 'center', frozen : false, sortable : false, sorttype : 'date', editable : false, edittype : 'text',   editrules:{required : false}, editoptions: {maxlength: 20, dataInit:processGrid.dateTimePickerFmatter}},
+      { name : 'endInputBtn',                 width :  '80', align : 'center', frozen : false, sortable : false, sorttype : 'text', editable : false, formatter: processStatusInputBtnFmatter, formatoptions:{isStart:false}},
+      { name : 'endDatetime',                 width : '150', align : 'center', frozen : false, sortable : false, sorttype : 'date', editable : false, edittype : 'text',   editrules:{required : false}, editoptions: {maxlength: 20, dataInit:processGrid.dateTimePickerFmatter}},
+      <c:forEach var="i" begin="1" end="${processMaterialSize}" step="1">
+      { name : 'materialComponentNo${i}',     hidden : true },
+      { name : 'materialName${i}',            width : '120', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false},
+      { name : 'materialQty${i}',             width :  '90', align : 'right',  frozen : false, sortable : false, sorttype : 'text', editable : true,  edittype : 'text',   editrules:{required : false}, editoptions: {maxlength: ${materialQuantityMaxLength}}},
+      { name : 'materialUnit${i}',            width :  '40', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false},
+      </c:forEach>
+      <c:forEach var="i" begin="1" end="${processSpecSize}" step="1">
+      { name : 'specComponentNo${i}',         hidden : true },
+      { name : 'specId${i}',                  hidden : true },
+      { name : 'specAttributeId${i}',         hidden : true },
+      { name : 'specParts${i}',               hidden : true },
+      { name : 'specName${i}',                width : '120', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : false},
+      { name : 'inputValue${i}',              width : '120', align : 'left',   frozen : false, sortable : false, sorttype : 'text', editable : true,  edittype : 'text',   editrules:{required : false}, editoptions: {maxlength: ${specInputvalueMaxLength}, separator : ':::', delimiter : '|||'}},
+      </c:forEach>
+      { name : 'productResults',              hidden : true },
+      { name : 'productPlans',                hidden : true },
+      { name : 'productsMaterialSize',        hidden : true },
+      { name : 'productsSpecSize',            hidden : true },
+    ];
+
+  processGrid.groupHeader = (function() {
+    $(processGrid.gridId).jqGrid('setGroupHeaders', {
+      useColSpanStyle : true,
+      groupHeaders : [
+                      <c:forEach var="i" begin="1" end="${processMaterialSize}" step="1">
+                      {startColumnName: 'materialComponentNo${i}',   numberOfColumns: 4, titleText: '<bean:message key="material"/>${i}'},
+                      </c:forEach>
+                      <c:forEach var="i" begin="1" end="${processSpecSize}" step="1">
+                      {startColumnName: 'specComponentNo${i}',   numberOfColumns: 6, titleText: '<bean:message key="spec"/>${i}'},
+                      </c:forEach>
+                     ]
+    });
+  });
+
+  //processGrid.datetimepicker.dateformat = "mm/dd/yy";
+  //processGrid.datetimepicker.timeformat = "";
+
+  processGrid.prop.data =
+    [
+      {'processComponentNo' : '1','processName' : 'Process1','planQty' : '100','resultQty' : '50','inferiorQty' : '2','status' : '1','startDatetime' : '2015/05/20','endDatetime' : '2015/05/30'},
+    ];
+	
+  processGrid.prop.data = ${processResultJson};
+
+  processGrid.prop.width = 1100;
+  processGrid.prop.height = 151;
+
+  processGrid.prop.rownumbers = false;
+
+  processGrid.edit(${f:url('/')});
+
+  processGrid.prop.onSelectRowEx = function (rowId){
+
+    clearProcessProductData();
+
+    // if selected row status is NONE then disallow edit.
+    var statusId = getStatusId($(processGrid.gridId).getCell(rowId, "status"));
+
+    if (statusId == "none") {
+
+      $(processGrid.gridId).resetSelection();
+      dialogUtils.alert("<bean:message key='errors.process.result.notstarted'/>");
+
+      var results = {"canEdit":false};
+      return results;
+    }
+
+    $("#selectProcessName").text($(processGrid.gridId).getCell(rowId, "processName"));
+
+    setProcessMaterialColumn(rowId);
+    setProcessSpecColumn(rowId);
+
+    setProcessProductGrid(rowId, "${productPlanNo}", $(processGrid.gridId).getCell(rowId, "processComponentNo"));
+
+    processProductGrid.prop.fitResize();
+  };
+
+  $(processGrid.gridId).jqGrid(processGrid.prop);
+}
+
+var processStatusStyleFmatter = function(rowId, val, rowObject, cm, rdata, name){
+
+  if (!rdata.status){
+    return "";
+  }
+
+  var color = processStatusColor[rdata.status];
+
+  return  'style="color: ' + color + ';"';
+}
+
+var processStatusInputBtnFmatter = function(cellvalue, options, rowObject) {
+
+  var valueName;
+  var statusId;
+  var disabled = "";
+  var rowId = options['rowId'];
+  var currentStatusId = getStatusId(rowObject.status);
+
+  if (options.colModel.formatoptions.isStart) {
+
+    valueName = "<bean:message key="process.start"/>";
+    statusId = "start";
+
+  }else{
+
+    valueName = "<bean:message key="process.complete"/>";
+    statusId = "complete";
+
+    if (currentStatusId == "none") {
+      disabled = "disabled";
+    }
+  }
+
+  return '<input type="button" value="' + valueName + '" onclick="confirmOfchangeStatus(\'' + rowId + '\',\'' + statusId + '\')" ' + disabled + '/>';
+}
+
+function confirmOfchangeStatus(rowId, statusId) {
+
+  if (processGrid.isEditing()) {
+    dialogUtils.confirm(
+      "<bean:message key='info.editing'/>",
+        function() {
+         changeStatus(rowId, statusId);
+        });
+  }else{
+    changeStatus(rowId, statusId);
+  }
+}
+
+function changeStatus(rowId, statusId) {
+
+  ajaxPostJson({
+    url: "${f:url('/product/productResultInput/changeStatus/')}",
+    data: {
+      productPlanNo : $("#productPlanNo").val(),
+      processComponentNo : $(processGrid.gridId).getCell(rowId, "processComponentNo"),
+      statusId : statusId
+    },
+    success: function(data) {
+      if (data.result == "OK") {
+
+        $("#processComponentNo").val($(processGrid.gridId).getCell(rowId, "processComponentNo"));
+        $("#statusId").val(statusId);
+
+        $("#mainForm").attr("action", "${f:url('/product/productResultInput/')}");
+        $("#mainForm").submit();
+
+      } else if (data.result == "NG") {
+        dialogUtils.alert(data.message);
+      }
+    }
+  });
+}
+
+
+function clearProcessProductData(){
+
+  $("#selectProcessName").text("");
+  $(processProductGrid.gridId).clearGridData();
+  $(processProductGrid.gridId).trigger("reloadGrid");
+}
+
+function setProcessProductGrid(rowId, productPlanNo, processComponentNo) {
+
+  var productResults = $(processGrid.gridId).getCell(rowId, "productResults");
+  var productPlans = $(processGrid.gridId).getCell(rowId, "productPlans");
+  var productsMaterialSize = $(processGrid.gridId).getCell(rowId, "productsMaterialSize");
+  var productsSpecSize = $(processGrid.gridId).getCell(rowId, "productsSpecSize");
+
+  // get data from the server if the first time select the row
+  if (!productResults) {
+    data = getProcessProductData(productPlanNo, processComponentNo);
+    if (!data) {
+      return;
+    }
+
+    var productData = combineResultListAndPlan($.parseJSON(data.productResultJson), $.parseJSON(data.productPlanJson));
+    productResults = JSON.stringify(productData);
+    productPlans = data.productPlanJson;
+    productsMaterialSize = data.productMaterialPlanSize;
+    productsSpecSize = data.productSpecPlanSize;
+
+    $(processGrid.gridId).setCell(rowId, "productResults", productResults);
+    $(processGrid.gridId).setCell(rowId, "productPlans", productPlans);
+    $(processGrid.gridId).setCell(rowId, "productsMaterialSize", productsMaterialSize);
+    $(processGrid.gridId).setCell(rowId, "productsSpecSize", productsSpecSize);
+  }
+
+  $(processProductGrid.gridId).clearGridData();
+  $(processProductGrid.gridId).setGridParam({datatype: "local", data: JqGridUtils.setDetailGrid(productResults)});
+  $(processProductGrid.gridId).trigger("reloadGrid");
+
+  setProcessProductGridColumnState(processProductGrid.gridId, productsMaterialSize, productsSpecSize, $.parseJSON(productPlans));
+}
+
+
+function getProcessProductData(productPlanNo, processComponentNo) {
+
+  var processProductData;
+
+  ajaxPostJson({
+    url: "${f:url('/product/productResultInput/processProductData/')}",
+    data: {
+      productPlanNo : productPlanNo,
+      processComponentNo : processComponentNo,
+    },
+    success:function(data) {
+      if (data.result == "OK") {
+        processProductData = data;
+      } else if (data.result == "NG") {
+        dialogUtils.alert(data.message);
+        return false;
+      }
+    }
+  });
+
+  return processProductData;
+}
+
+function setProcessMaterialColumn(rowId) {
+
+  var processMaterialSize = parseInt(${processMaterialSize});
+
+  for (var i = 1; i <= processMaterialSize; i++) {
+
+    var materialComponentNo = $(processGrid.gridId).getCell(rowId, "materialComponentNo" + i);
+
+    var enabled = false;
+    if (materialComponentNo) {
+      enabled = true;
+    }
+
+    $(processGrid.gridId).setColProp("materialQty" + i, {editable:enabled});
+  }
+}
+
+function setProcessSpecColumn(rowId) {
+
+  var processSpecSize = parseInt(${processSpecSize});
+
+  for (var i = 1; i <= processSpecSize; i++) {
+
+    var specId = $(processGrid.gridId).getCell(rowId, "specId" + i);
+    var specAttributeId = $(processGrid.gridId).getCell(rowId, "specAttributeId" + i);
+    var specParts = $(processGrid.gridId).getCell(rowId, "specParts" + i);
+
+    setSpecEditControlToGrid(processGrid.gridId, "inputValue" + i, specId, specAttributeId, specParts);
+  }
+}
+
+/**
+ * change the status value to the status name.
+ */
+function getStatusId(statusValue){
+
+  var statusId = "none";
+
+  if (statusValue == "1") {
+
+    statusId = "start";
+
+  }else if(statusValue == "2") {
+
+    statusId = "complete";
+
+  }
+
+  return statusId;
+}
+</script>

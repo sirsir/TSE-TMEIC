@@ -1,0 +1,141 @@
+package jp.co.tmeic.mespd.service;
+
+import java.util.List;
+
+import javax.annotation.Generated;
+import javax.annotation.Resource;
+
+import jp.co.tmeic.mespd.entity.MBeforeProcess;
+import jp.co.tmeic.mespd.entity.MMaterial;
+import jp.co.tmeic.mespd.entity.MMaterialComponent;
+import jp.co.tmeic.mespd.entity.MProcessComponent;
+import jp.co.tmeic.mespd.entity.MProduct;
+import jp.co.tmeic.mespd.entity.MSpecProcessComponent;
+import jp.co.tmeic.mespd.entity.MSpecProductComponent;
+
+import org.apache.commons.lang3.StringUtils;
+import org.seasar.extension.jdbc.JdbcManager;
+
+/**
+ * {@link MProduct}のサービスクラスです。
+ *
+ */
+@Generated(value = { "S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl" })
+public class ProductService {
+
+	/** jdbcManager */
+	@Resource
+	protected JdbcManager jdbcManager;
+
+	@Resource
+	protected MProductService mProductService;
+
+	@Resource
+	protected MMaterialService mMaterialService;
+
+	@Resource
+	protected MProcessComponentService mProcessComponentService;
+
+	@Resource
+	protected MSpecProductComponentService mSpecProductComponentService;
+
+	@Resource
+	protected MSpecProcessComponentService mSpecProcessComponentService;
+
+	@Resource
+	protected MMaterialComponentService mMaterialComponentService;
+
+	@Resource
+	protected MBeforeProcessService mBeforeProcessService;
+
+	/**
+	 * 指定の製品IDを指定先の製品IDへコピーします。
+	 *
+	 * @param srcPartNo
+	 * @param destPartNo
+	 * @param destPartName
+	 */
+	public void copy(String srcPartNo, String destPartNo, String destPartName) {
+
+		MProduct mProduct = mProductService.findByPartNo(srcPartNo);
+
+		mProduct.partNo = destPartNo;
+		mProduct.partName = destPartName;
+
+		mProductService.insert(mProduct);
+
+		for (MProcessComponent mProcessComponent : mProduct.MProcessComponentList) {
+
+			mProcessComponent.productId = destPartNo;
+
+			mProcessComponentService.insert(mProcessComponent);
+
+			for (MSpecProductComponent mSpecProductComponent : mProcessComponent.MSpecProductComponentList) {
+
+				mSpecProductComponent.productId = destPartNo;
+
+				mSpecProductComponentService.insert(mSpecProductComponent);
+			}
+
+			for (MSpecProcessComponent mSpecProcessComponent : mProcessComponent.MSpecProcessComponentList) {
+
+				mSpecProcessComponent.productId = destPartNo;
+
+				mSpecProcessComponentService.insert(mSpecProcessComponent);
+			}
+
+			for (MMaterialComponent mMaterialComponent : mProcessComponent.MMaterialComponentList) {
+
+				mMaterialComponent.productId = destPartNo;
+
+				mMaterialComponentService.insert(mMaterialComponent);
+			}
+
+			for (MBeforeProcess mBeforeProcess : mProcessComponent.MBeforeProcessList) {
+
+				mBeforeProcess.productId = destPartNo;
+
+				mBeforeProcessService.insert(mBeforeProcess);
+			}
+		}
+	}
+
+	/**
+	 * 製品種別が、(1:製品)の場合は、部材から削除し、(2:中間品,3:両方)の場合は、部材として登録する。
+	 */
+	public void materialRegister() {
+
+		List<MProduct> mProducts = mProductService.findAllOrderById();
+
+		for (MProduct mProduct : mProducts) {
+
+			if (mProduct.productKind == 1) {
+
+				mMaterialService.deleteById(mProduct.partNo);
+
+				continue;
+			}
+
+			MMaterial mMaterial = mMaterialService.findById(mProduct.partNo);
+
+			if (mMaterial == null) {
+
+				mMaterial = new MMaterial();
+				mMaterial.materialId = mProduct.partNo;
+				mMaterial.materialName = mProduct.partName;
+
+				mMaterialService.insert(mMaterial);
+
+				continue;
+			}
+
+			if (StringUtils.equals(mMaterial.materialName, mProduct.partName)) {
+				continue;
+			}
+
+			mMaterial.materialName = mProduct.partName;
+
+			mMaterialService.update(mMaterial);
+		}
+	}
+}

@@ -1,0 +1,114 @@
+package jp.co.tmeic.mespd.service;
+
+import static jp.co.tmeic.mespd.entity.DSpecProductResultNames.processComponentNo;
+import static jp.co.tmeic.mespd.entity.DSpecProductResultNames.productPlanNo;
+import static jp.co.tmeic.mespd.entity.DSpecProductResultNames.revision;
+import static jp.co.tmeic.mespd.entity.DSpecProductResultNames.serialNo;
+import static jp.co.tmeic.mespd.entity.DSpecProductResultNames.specComponentNo;
+import static org.seasar.extension.jdbc.operation.Operations.asc;
+
+import java.util.List;
+
+import javax.annotation.Generated;
+
+import jp.co.tmeic.mespd.entity.DSpecProductResult;
+
+/**
+ * {@link DSpecProductResult}のサービスクラスです。
+ *
+ */
+@Generated(value = {"S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl"})
+public class DSpecProductResultService extends AbstractService<DSpecProductResult> {
+
+    /**
+     * 識別子でエンティティを検索します。
+     *
+     * @param productPlanNo
+     *            識別子
+     * @param processComponentNo
+     *            識別子
+     * @param serialNo
+     *            識別子
+     * @param revision
+     *            識別子
+     * @param specComponentNo
+     *            識別子
+     * @return エンティティ
+     */
+    public DSpecProductResult findById(String productPlanNo, Integer processComponentNo, String serialNo, Integer revision, Integer specComponentNo) {
+        return select().id(productPlanNo, processComponentNo, serialNo, revision, specComponentNo).getSingleResult();
+    }
+
+    /**
+     * 識別子の昇順ですべてのエンティティを検索します。
+     *
+     * @return エンティティのリスト
+     */
+    public List<DSpecProductResult> findAllOrderById() {
+        return select().orderBy(asc(productPlanNo()), asc(processComponentNo()), asc(serialNo()), asc(revision()), asc(specComponentNo())).getResultList();
+    }
+
+    /**
+     * 識別子でエンティティを削除します。
+     *
+     * @param productPlanNo
+     *            識別子
+     * @param processComponentNo
+     *            識別子
+     * @param serialNo
+     *            識別子
+     * @param revision
+     *            識別子
+     * @return エンティティ
+     */
+    public int deleteById(String productPlanNo, Integer processComponentNo, String serialNo, Integer revision) {
+    	return jdbcManager
+		.updateBySql(
+				"DELETE FROM d_spec_product_result WHERE "
+						+ "product_plan_no=? AND "
+						+ "process_component_no=? AND "
+						+ "serial_no=? AND "
+						+ "revision=?",
+				String.class ,
+				Integer.class ,
+				String.class ,
+				Integer.class)
+		.params(productPlanNo, processComponentNo, serialNo, revision)
+		.execute();
+
+    }
+
+	/**
+	 * データの挿入、または更新を行います。
+	 *
+	 * @param entity
+	 */
+	public void insertOrUpdate(DSpecProductResult entity) {
+
+		boolean isExist =
+				isExist(entity.productPlanNo,
+						entity.processComponentNo,
+						entity.serialNo,
+						entity.revision,
+						entity.specComponentNo);
+
+		if (isExist) {
+			update(entity);
+		} else {
+			insert(entity);
+		}
+	}
+
+	/**
+	 * データの挿入、または更新を行います。
+	 *
+	 * @param entities
+	 */
+	public void insertOrUpdate(List<DSpecProductResult> entities) {
+
+		for (DSpecProductResult entity : entities) {
+			insertOrUpdate(entity);
+		}
+	}
+
+}

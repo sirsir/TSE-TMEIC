@@ -1,0 +1,57 @@
+package jp.co.tmeic.mespd.entity;
+
+import java.io.Serializable;
+import java.sql.Timestamp;
+import javax.annotation.Generated;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+/**
+ * ラベル印刷キュー
+ * 
+ */
+@Entity
+@Generated(value = {"S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.EntityModelFactoryImpl"})
+public class DLabelPrintQueue implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /** 追加日 */
+    @Column(nullable = false, unique = false)
+    public Timestamp createDate;
+
+    /** 更新日 */
+    @Column(nullable = false, unique = false)
+    public Timestamp updateDate;
+
+    /** プリンタID */
+    @Id
+    @Column(length = 10, nullable = false, unique = false)
+    public String printerId;
+
+    /** 印刷順 */
+    @Id
+    @Column(precision = 10, nullable = false, unique = false)
+    public Integer sequenceNo;
+
+    /** 印刷種別 */
+    @Column(length = 10, nullable = false, unique = false)
+    public String printType;
+
+    /**  部材ID */
+    @Column(length = 10, nullable = true, unique = false)
+    public String materialId;
+
+    /**  部材名 */
+    @Column(length = 30, nullable = true, unique = false)
+    public String materialName;
+
+    /**  製造計画No */
+    @Column(length = 12, nullable = true, unique = false)
+    public String productPlanNo;
+
+    /**  シリアルNo */
+    @Column(length = 12, nullable = true, unique = false)
+    public String serialNo;
+}

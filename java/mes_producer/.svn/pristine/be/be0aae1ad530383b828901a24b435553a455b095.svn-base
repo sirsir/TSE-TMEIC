@@ -1,0 +1,71 @@
+/*
+ * Copyright 2004-2008 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package jp.co.tmeic.mespd.form.master;
+
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+
+import jp.co.tmeic.mespd.utils.JqgridUtil;
+
+import org.seasar.struts.util.MessageResourcesUtil;
+import org.seasar.struts.util.RequestUtil;
+
+/** 製品マスタ */
+public class ProductForm {
+
+	/** 製品マスタ */
+	public String productJson;
+
+	/** システムプロパティ */
+	public Properties systemProperties;
+
+	/** 製品種別 */
+	public String getProductKind() {
+
+		Locale locale = RequestUtil.getRequest().getLocale();
+
+		Map<String, String> map = new LinkedHashMap<>();
+		map.put("1", MessageResourcesUtil.getMessage(locale, "product"));
+		map.put("2", MessageResourcesUtil.getMessage(locale, "interim.product"));
+		map.put("3", MessageResourcesUtil.getMessage(locale, "both"));
+		return JqgridUtil.toSelect(map);
+	}
+	
+	/** メッキマシン */
+	public String getPlatingMachine() {
+
+		Locale locale = RequestUtil.getRequest().getLocale();
+
+		Map<String, String> map = new LinkedHashMap<>();
+		map.put("1", MessageResourcesUtil.getMessage(locale, "product.plating.machine.ep6"));
+		map.put("2", MessageResourcesUtil.getMessage(locale, "product.plating.machine.ep9"));
+		return JqgridUtil.toSelect(map);
+	}
+
+	/** 工程マスタ */
+	public String mProcess;
+
+	/** 仕様マスタ */
+	public String mSpec;
+
+	/** 部材マスタ */
+	public String mMaterial;
+
+	/** 部材数量最大桁数 */
+	public int materialQuantityMaxLength;
+}

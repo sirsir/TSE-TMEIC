@@ -1,0 +1,86 @@
+/* header menuarea */
+div.top_menu {
+  background-color: #2E75B6;
+  border-bottom: 2px solid #fff;
+  height: 25px;
+  min-width: 950px;
+  width: 100%;
+}
+
+/* login user's info in menuarea */
+div.top_menu div.userinfo {
+  color: #fff;
+  float: left;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+/* menu in header */
+div.top_menu ul.top_menu__menu {
+  float: right;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* menu items */
+div.top_menu ul.top_menu__menu li {
+  background-color: #2E75B6;
+  border-left: 1px solid #5ad;
+  color: #fff;
+  word-break: break-all;
+  display: block;
+  float: left;
+  margin: 0;
+  position: relative;
+  /* width: 170px; this value defines width of the drop menu. if change this value, change "a .menuitem" value too.  */
+}
+
+/* ul for drop down  */
+div.top_menu ul.top_menu__menu ul.child {
+  display: none;
+  padding: 0;
+  position: absolute;
+}
+
+/* menu items for drop down  */
+div.top_menu ul.top_menu__menu ul.child li {
+  border: none;
+  border-top: 1px solid #5ad;
+  z-index: 99999;
+}
+
+/* anchor in menu items */
+div.top_menu ul.top_menu__menu li a {
+  color: #fff;
+  display: block;
+  height: 25px; /* set same value as "div.top_menu" */
+  text-decoration: none;
+}
+
+/* menu text in anchor */
+div.top_menu ul.top_menu__menu li a .menuitem {
+  display: block;
+  height: 15px; /* calculate value ... "div.top_menu ul li a".height - this.padding */
+  padding: 5px 5px;
+  /* width: 160px; calculate value ... "div.top_menu ul li".width    - this.padding */
+}
+
+/* anchor style on hover */
+div.top_menu ul.top_menu__menu li a:hover {
+  background: #cef;
+  color: #335566;
+}
+
+div.top_menu ul.top_menu__menu .menuitem-width-short {
+ width: 95px;
+}
+
+div.top_menu ul.top_menu__menu .menuitem-width-medium {
+ width: 138px;
+}
+
+div.top_menu ul.top_menu__menu .menuitem-width-large {
+ width: 170px;
+}

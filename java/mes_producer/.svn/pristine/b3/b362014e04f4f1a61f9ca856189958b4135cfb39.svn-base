@@ -1,0 +1,537 @@
+package jp.co.tmeic.mespd.service;
+
+import static jp.co.tmeic.mespd.entity.DProcessProductResultNames.*;
+import static org.seasar.extension.jdbc.operation.Operations.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Generated;
+
+import jp.co.tmeic.mespd.constant.ProcessProductStatus;
+import jp.co.tmeic.mespd.constant.ProductQuality;
+import jp.co.tmeic.mespd.entity.DProcessProductResult;
+import jp.co.tmeic.mespd.utils.SystemParameterUtil;
+import jp.co.tmeic.mespd.utils.TimestampUtil;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.seasar.extension.jdbc.AutoSelect;
+import org.seasar.extension.jdbc.where.SimpleWhere;
+
+/**
+ * {@link DProcessProductResult}のサービスクラスです。
+ *
+ */
+@Generated(value = { "S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.ServiceModelFactoryImpl" })
+public class DProcessProductResultService extends AbstractService<DProcessProductResult> {
+
+	/**
+	 * 識別子でエンティティを検索します。
+	 *
+	 * @param productPlanNo
+	 *            識別子
+	 * @param processComponentNo
+	 *            識別子
+	 * @param serialNo
+	 *            識別子
+	 * @param revision
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public DProcessProductResult findById(String productPlanNo, Integer processComponentNo, String serialNo, Integer revision) {
+		return select().id(productPlanNo, processComponentNo, serialNo, revision).getSingleResult();
+	}
+
+	/**
+	 * 識別子でエンティティを検索します。
+	 *
+	 * @param productPlanNo
+	 *            識別子
+	 * @param processComponentNo
+	 *            識別子
+	 * @param serialNo
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public List<DProcessProductResult> findBySerialNo(String productPlanNo, Integer processComponentNo, String serialNo) {
+		return select()
+				.where(new SimpleWhere()
+						.eq(productPlanNo(), productPlanNo)
+						.eq(processComponentNo(), processComponentNo)
+						.eq(serialNo(), serialNo))
+				.orderBy(
+						asc(revision()))
+				.getResultList();
+	}
+
+	/**
+	 * 識別子の昇順ですべてのエンティティを検索します。
+	 *
+	 * @return エンティティのリスト
+	 */
+	public List<DProcessProductResult> findAllOrderById() {
+		return select().orderBy(asc(productPlanNo()), asc(processComponentNo()), asc(serialNo()), asc(revision())).getResultList();
+	}
+
+	/**
+	 * 製造計画No、工程構成Noで検索した実績数を取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @return
+	 */
+	public Integer countByProcessComponentNo(String productPlanNo, Integer processComponentNo) {
+		return jdbcManager
+				.selectBySql(
+						Integer.class,
+						"SELECT COUNT(product_plan_no) FROM d_process_product_result WHERE product_plan_no=? AND process_component_no=? AND status=?",
+						productPlanNo, processComponentNo, ProcessProductStatus.COMPLETE)
+				.getSingleResult();
+	}
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNoの状態を開始に変更する
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @return 状態の変更結果
+	 */
+	public boolean workStart(String productPlanNo, Integer processComponentNo, String serialNo) {
+
+		Integer revision = getIncompleteMinRevision(productPlanNo, processComponentNo, serialNo);
+		
+		System.out.print("--------------------------------------------" );
+		
+		DProcessProductResult dProcessProductResult;
+		
+		System.out.print("--------------------------------------------" );
+		System.out.print(revision);
+
+		boolean isNewRow = false;
+
+		if (revision == null) {
+
+			isNewRow = true;
+
+			dProcessProductResult = new DProcessProductResult();
+			dProcessProductResult.productPlanNo = productPlanNo;
+			dProcessProductResult.processComponentNo = processComponentNo;
+			dProcessProductResult.serialNo = serialNo;
+			dProcessProductResult.status = ProcessProductStatus.NONE;
+			if(processComponentNo == SystemParameterUtil.deburringValue()){
+				dProcessProductResult.quality = ProductQuality.OK;
+			}
+			else{
+				dProcessProductResult.quality = ProductQuality.NONE;
+			}
+
+			StringBuilder sql = new StringBuilder();
+			sql.append(" SELECT MAX(revision)");
+			sql.append("   FROM d_process_product_result");
+			sql.append("  WHERE product_plan_no=?");
+			sql.append("    AND process_component_no=?");
+			sql.append("    AND serial_no=?");
+
+			dProcessProductResult.revision = max(sql.toString(), productPlanNo, processComponentNo, serialNo) + 1;
+
+		} else {
+
+			dProcessProductResult = findById(productPlanNo, processComponentNo, serialNo, revision);
+		}
+
+		switch (dProcessProductResult.status) {
+
+			case ProcessProductStatus.START:
+				return true;
+
+			case ProcessProductStatus.NONE:
+			case ProcessProductStatus.COMPLETE:
+
+				dProcessProductResult.status = ProcessProductStatus.START;
+
+				if (dProcessProductResult.startDate == null) {
+					dProcessProductResult.startDate = TimestampUtil.now();
+				}
+
+				if (isNewRow) {
+					insert(dProcessProductResult);
+				} else {
+					update(dProcessProductResult);
+				}
+
+				return true;
+		}
+
+		return true;
+	}
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNoの状態を完了に変更する。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @param userId
+	 *            作業完了ユーザID
+	 * @param userName
+	 *            作業完了ユーザ名
+	 * @return 状態の変更結果
+	 */
+	public boolean workEnd(String productPlanNo, Integer processComponentNo, String serialNo, String userId, String userName) {
+
+		Integer revision = getIncompleteMinRevision(productPlanNo, processComponentNo, serialNo);
+
+		if (revision == null) {
+			return false;
+		}
+
+		DProcessProductResult dProcessProductResult = findById(productPlanNo, processComponentNo, serialNo, revision);
+
+		switch (dProcessProductResult.status) {
+
+			case ProcessProductStatus.NONE:
+			case ProcessProductStatus.COMPLETE:
+
+				return true;
+
+			case ProcessProductStatus.START:
+
+				dProcessProductResult.status = ProcessProductStatus.COMPLETE;
+				dProcessProductResult.userId = userId;
+				dProcessProductResult.userName = userName;
+
+				if (dProcessProductResult.endDate == null) {
+					dProcessProductResult.endDate = TimestampUtil.now();
+				}
+
+				update(dProcessProductResult);
+
+				return true;
+		}
+
+		return true;
+	}
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNoの未完了の最小レビジョンを取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @return 最小レビジョン:未完了あり、null:未完了無し
+	 */
+	public Integer getIncompleteMinRevision(String productPlanNo, Integer processComponentNo, String serialNo) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT MIN(revision)");
+		sql.append("   FROM d_process_product_result");
+		sql.append("  WHERE product_plan_no=?");
+		sql.append("    AND process_component_no=?");
+		sql.append("    AND serial_no=?");
+		sql.append("    AND status IN(?,?)");
+
+		return jdbcManager
+				.selectBySql(
+						Integer.class,
+						sql.toString(),
+						productPlanNo, processComponentNo, serialNo, ProcessProductStatus.NONE, ProcessProductStatus.START)
+				.getSingleResult();
+	}
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNoの完了の最小レビジョンを取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @return 最小レビジョン:完了あり、null:完了無し
+	 */
+	public Integer getCompleteMinRevision(String productPlanNo, Integer processComponentNo, String serialNo) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT MIN(revision)");
+		sql.append("   FROM d_process_product_result");
+		sql.append("  WHERE product_plan_no=?");
+		sql.append("    AND process_component_no=?");
+		sql.append("    AND serial_no=?");
+		sql.append("    AND status = ?");
+
+		return jdbcManager
+				.selectBySql(
+						Integer.class,
+						sql.toString(),
+						productPlanNo, processComponentNo, serialNo, ProcessProductStatus.COMPLETE)
+				.getSingleResult();
+	}
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNoの最大レビジョンを取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @return 最大レビジョン:未完了あり、null:未完了無し
+	 */
+	public Integer getMaxRevision(String productPlanNo, Integer processComponentNo, String serialNo) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT MAX(revision)");
+		sql.append("   FROM d_process_product_result");
+		sql.append("  WHERE product_plan_no=?");
+		sql.append("    AND process_component_no=?");
+		sql.append("    AND serial_no=?");
+
+		return jdbcManager
+				.selectBySql(
+						Integer.class,
+						sql.toString(),
+						productPlanNo, processComponentNo, serialNo)
+				.getSingleResult();
+	}
+
+	/**
+	 * 指定の製造計画No、工程の実績を検索します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public List<DProcessProductResult> findProductResultsById(String productPlanNo, Integer processComponentNo) {
+
+		return findAllResults()
+				.where(new SimpleWhere()
+						.eq(productPlanNo(), productPlanNo)
+						.eq(processComponentNo(), processComponentNo))
+				.orderBy(
+						asc(serialNo()),
+						asc(revision()),
+						asc(DMaterialProductResultList().materialComponentNo()),
+						asc(DSpecProductResultList().specComponentNo()))
+				.getResultList();
+	}
+
+	/**
+	 * 指定の製造計画No、工程、シリアルNo、リビジョンの実績を検索します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 * @param revision
+	 *            識別子
+	 * @return エンティティ
+	 */
+	public DProcessProductResult findProductResultsById(String productPlanNo, Integer processComponentNo, String serialNo, Integer revision) {
+
+		return findAllResults()
+				.where(new SimpleWhere()
+						.eq(productPlanNo(), productPlanNo)
+						.eq(processComponentNo(), processComponentNo)
+						.eq(serialNo(), serialNo)
+						.eq(revision(), revision))
+				.orderBy(
+						asc(revision()),
+						asc(DMaterialProductResultList().materialComponentNo()),
+						asc(DSpecProductResultList().specComponentNo()))
+				.getSingleResult();
+	}
+
+	private AutoSelect<DProcessProductResult> findAllResults() {
+		return select()
+				.leftOuterJoin(DSpecProductResultList())
+				.leftOuterJoin(DMaterialProductResultList());
+	}
+
+	/**
+	 * 指定工程の製造数を取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @return
+	 */
+	public long findActualCount(String productPlanNo, Integer processComponentNo) {
+
+		Map<String, Object> param = new HashMap<>();
+
+		param.put("productPlanNo", productPlanNo);
+		param.put("processComponentNo", processComponentNo);
+
+		return jdbcManager.selectBySqlFile(
+				long.class,
+				"jp/co/tmeic/mespd/service/DProcessProductResultService_findActualCount.sql",
+				param)
+				.getSingleResult();
+	}
+
+	/**
+	 * 指定工程の不良数を取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @return
+	 */
+	public long findRejectCount(String productPlanNo, Integer processComponentNo) {
+
+		Map<String, Object> param = new HashMap<>();
+
+		param.put("productPlanNo", productPlanNo);
+		param.put("processComponentNo", processComponentNo);
+
+		return jdbcManager.selectBySqlFile(
+				long.class,
+				"jp/co/tmeic/mespd/service/DProcessProductResultService_findRejectCount.sql",
+				param)
+				.getSingleResult();
+	}
+
+	/**
+	 * シリアルNoから製品IDを取得します。
+	 *
+	 * @param serialNo
+	 * @return 製品ID
+	 */
+	public String findPartNo(String serialNo) {
+
+		Map<String, Object> param = new HashMap<>();
+
+		param.put("serialNo", serialNo);
+
+		List<String> partNos =
+				jdbcManager.selectBySqlFile(
+						String.class,
+						"jp/co/tmeic/mespd/service/DProcessProductResultService_findPartNo.sql",
+						param)
+						.getResultList();
+
+		if (CollectionUtils.sizeIsEmpty(partNos)) {
+			return StringUtils.EMPTY;
+		}
+
+		return partNos.get(0);
+	}
+
+	/**
+	 * 前工程の製品実績有無を取得します。
+	 *
+	 * @param productPlanNo
+	 * @param processComponentNo
+	 * @param serialNo
+	 *            識別子
+	 * @return 前工程実績有無
+	 */
+	public boolean isExistsPreviousResult(String productPlanNo, int processComponentNo, String serialNo) {
+
+		Integer previousProcessComponentNo = getPreviousProcessComponentNo(productPlanNo, processComponentNo);
+
+		if (previousProcessComponentNo == null) {
+			return true;
+		}
+
+		List<DProcessProductResult> dProcessProductResults = findBySerialNo(productPlanNo, previousProcessComponentNo, serialNo);
+
+		if (dProcessProductResults.size() <= 0) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * 前工程の工程構成Noを取得します。
+	 *
+	 * @param productPlanNo
+	 * @return 工程構成No(先頭工程の場合はnull)
+	 */
+	public Integer getPreviousProcessComponentNo(String productPlanNo, int processComponentNo) {
+
+		DProcessProductResult dProcessProductResult =
+				select()
+						.where(new SimpleWhere()
+								.eq(productPlanNo(), productPlanNo)
+								.lt(processComponentNo(), processComponentNo))
+						.orderBy(
+								desc(processComponentNo()))
+						.limit(1)
+						.getSingleResult();
+
+		if (dProcessProductResult == null) {
+			return null;
+		}
+
+		return dProcessProductResult.processComponentNo;
+	}
+
+	/**
+	 * データの挿入、または更新を行います。
+	 *
+	 * @param entity
+	 */
+	public void insertOrUpdate(DProcessProductResult entity) {
+
+		boolean isExist = isExist(entity.productPlanNo, entity.processComponentNo, entity.serialNo, entity.revision);
+
+		if (isExist) {
+			update(entity);
+		} else {
+			insert(entity);
+		}
+	}
+
+	/**
+	 * データの挿入、または更新を行います。
+	 *
+	 * @param entities
+	 */
+	public void insertOrUpdate(List<DProcessProductResult> entities) {
+
+		for (DProcessProductResult entity : entities) {
+			insertOrUpdate(entity);
+		}
+	}
+
+	/**
+	 * シリアルNoから製品IDを取得します。
+	 *
+	 * @param serialNo
+	 * @return 製品ID
+	 */
+	public String findProductId(String serialNo) {
+
+		Map<String, Object> param = new HashMap<>();
+
+		param.put("serialNo", serialNo);
+
+		List<String> productIds =
+				jdbcManager.selectBySqlFile(
+						String.class,
+						"jp/co/tmeic/mespd/service/DProcessProductResultService_findProductId.sql",
+						param)
+						.getResultList();
+
+		if (CollectionUtils.sizeIsEmpty(productIds)) {
+			return StringUtils.EMPTY;
+		}
+
+		return productIds.get(0);
+	}
+	
+	public boolean checkTime(String productPlanNo, Integer processComponentNo, String serialNo) {
+
+		Integer revision = getIncompleteMinRevision(productPlanNo, processComponentNo, serialNo);
+
+		if (revision == null) {
+			return false;
+		}
+
+		DProcessProductResult dProcessProductResult = findById(productPlanNo, processComponentNo, serialNo, revision);
+		dProcessProductResult.checkDate = TimestampUtil.now();
+		
+		update(dProcessProductResult);
+
+
+		return true;
+	}
+}

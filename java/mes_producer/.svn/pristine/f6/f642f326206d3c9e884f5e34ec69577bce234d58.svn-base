@@ -1,0 +1,209 @@
+package jp.co.tmeic.mespd.entity;
+
+import java.sql.Timestamp;
+import javax.annotation.Generated;
+import org.seasar.extension.jdbc.name.PropertyName;
+
+/**
+ * {@link DLabelPrintQueue}のプロパティ名の集合です。
+ * 
+ */
+@Generated(value = {"S2JDBC-Gen 2.4.46", "org.seasar.extension.jdbc.gen.internal.model.NamesModelFactoryImpl"})
+public class DLabelPrintQueueNames {
+
+    /**
+     * createDateのプロパティ名を返します。
+     * 
+     * @return createDateのプロパティ名
+     */
+    public static PropertyName<Timestamp> createDate() {
+        return new PropertyName<Timestamp>("createDate");
+    }
+
+    /**
+     * updateDateのプロパティ名を返します。
+     * 
+     * @return updateDateのプロパティ名
+     */
+    public static PropertyName<Timestamp> updateDate() {
+        return new PropertyName<Timestamp>("updateDate");
+    }
+
+    /**
+     * printerIdのプロパティ名を返します。
+     * 
+     * @return printerIdのプロパティ名
+     */
+    public static PropertyName<String> printerId() {
+        return new PropertyName<String>("printerId");
+    }
+
+    /**
+     * sequenceNoのプロパティ名を返します。
+     * 
+     * @return sequenceNoのプロパティ名
+     */
+    public static PropertyName<Integer> sequenceNo() {
+        return new PropertyName<Integer>("sequenceNo");
+    }
+
+    /**
+     * printTypeのプロパティ名を返します。
+     * 
+     * @return printTypeのプロパティ名
+     */
+    public static PropertyName<String> printType() {
+        return new PropertyName<String>("printType");
+    }
+
+    /**
+     * materialIdのプロパティ名を返します。
+     * 
+     * @return materialIdのプロパティ名
+     */
+    public static PropertyName<String> materialId() {
+        return new PropertyName<String>("materialId");
+    }
+
+    /**
+     * materialNameのプロパティ名を返します。
+     * 
+     * @return materialNameのプロパティ名
+     */
+    public static PropertyName<String> materialName() {
+        return new PropertyName<String>("materialName");
+    }
+
+    /**
+     * productPlanNoのプロパティ名を返します。
+     * 
+     * @return productPlanNoのプロパティ名
+     */
+    public static PropertyName<String> productPlanNo() {
+        return new PropertyName<String>("productPlanNo");
+    }
+
+    /**
+     * serialNoのプロパティ名を返します。
+     * 
+     * @return serialNoのプロパティ名
+     */
+    public static PropertyName<String> serialNo() {
+        return new PropertyName<String>("serialNo");
+    }
+
+    /**
+     * @author S2JDBC-Gen
+     */
+    public static class _DLabelPrintQueueNames extends PropertyName<DLabelPrintQueue> {
+
+        /**
+         * インスタンスを構築します。
+         */
+        public _DLabelPrintQueueNames() {
+        }
+
+        /**
+         * インスタンスを構築します。
+         * 
+         * @param name
+         *            名前
+         */
+        public _DLabelPrintQueueNames(final String name) {
+            super(name);
+        }
+
+        /**
+         * インスタンスを構築します。
+         * 
+         * @param parent
+         *            親
+         * @param name
+         *            名前
+         */
+        public _DLabelPrintQueueNames(final PropertyName<?> parent, final String name) {
+            super(parent, name);
+        }
+
+        /**
+         * createDateのプロパティ名を返します。
+         *
+         * @return createDateのプロパティ名
+         */
+        public PropertyName<Timestamp> createDate() {
+            return new PropertyName<Timestamp>(this, "createDate");
+        }
+
+        /**
+         * updateDateのプロパティ名を返します。
+         *
+         * @return updateDateのプロパティ名
+         */
+        public PropertyName<Timestamp> updateDate() {
+            return new PropertyName<Timestamp>(this, "updateDate");
+        }
+
+        /**
+         * printerIdのプロパティ名を返します。
+         *
+         * @return printerIdのプロパティ名
+         */
+        public PropertyName<String> printerId() {
+            return new PropertyName<String>(this, "printerId");
+        }
+
+        /**
+         * sequenceNoのプロパティ名を返します。
+         *
+         * @return sequenceNoのプロパティ名
+         */
+        public PropertyName<Integer> sequenceNo() {
+            return new PropertyName<Integer>(this, "sequenceNo");
+        }
+
+        /**
+         * printTypeのプロパティ名を返します。
+         *
+         * @return printTypeのプロパティ名
+         */
+        public PropertyName<String> printType() {
+            return new PropertyName<String>(this, "printType");
+        }
+
+        /**
+         * materialIdのプロパティ名を返します。
+         *
+         * @return materialIdのプロパティ名
+         */
+        public PropertyName<String> materialId() {
+            return new PropertyName<String>(this, "materialId");
+        }
+
+        /**
+         * materialNameのプロパティ名を返します。
+         *
+         * @return materialNameのプロパティ名
+         */
+        public PropertyName<String> materialName() {
+            return new PropertyName<String>(this, "materialName");
+        }
+
+        /**
+         * productPlanNoのプロパティ名を返します。
+         *
+         * @return productPlanNoのプロパティ名
+         */
+        public PropertyName<String> productPlanNo() {
+            return new PropertyName<String>(this, "productPlanNo");
+        }
+
+        /**
+         * serialNoのプロパティ名を返します。
+         *
+         * @return serialNoのプロパティ名
+         */
+        public PropertyName<String> serialNo() {
+            return new PropertyName<String>(this, "serialNo");
+        }
+    }
+}
